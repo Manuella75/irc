@@ -13,12 +13,12 @@ class	Command
 	std::string	_cmd;
 	std::string	_args;
 	// User		_User;
-	
+
 
 	public :
 
 	/* Constructor */
-	Command(std::string cmd, std::map<int, User*>);
+	Command(std::string cmd, std::map<int, User*> Users, int clientSock);
 	/* Destructor */
 	~Command(void);
 };

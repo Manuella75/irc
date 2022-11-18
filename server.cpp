@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
+/*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/18 20:16:28 by mettien          ###   ########.fr       */
+/*   Updated: 2022/11/18 21:25:26 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_listenerSock = 0;
 	this->_sock = 0;
 	this->_lastFd = 0;
-	
+
 }
 
 Server::~Server(){}
@@ -47,16 +47,16 @@ void	Server::run()
 int Server::createSocket()
 {
 	///////  Creation du socket  ////////
-	
+
 	_listenerSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listenerSock == -1)
 		return -1;
 	// if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en non bloquant
 		// return -1;
 	std::cout << std::endl << " 1) Socket created" << std::endl;
-	
+
 	/////// Set up des caracteristiques du socket //////
-	
+
 	struct sockaddr_in listenerInfo;  					// sous forme d'une struct
 	memset(&listenerInfo, 0, sizeof(listenerInfo)); 	// initialisation de la struct de 0
 	listenerInfo.sin_family = AF_INET;  				// son type : Internet Protocol V4
@@ -64,15 +64,15 @@ int Server::createSocket()
 	listenerInfo.sin_addr.s_addr = htonl(INADDR_ANY); 	// son Ip : Localhost //
 	if (listenerInfo.sin_addr.s_addr == INADDR_NONE)	// traitement d'erreur
     	return -1;
-	
+
 	//////// Lier le socket aux caract fournies( adresse IP + port) ////////
-	
+
 	if (bind(_listenerSock, (struct sockaddr *)&listenerInfo, sizeof(listenerInfo)) < 0)
 		return -1;
 	std::cout << std::endl << " 2) Socket bounded" << std::endl;
-	
+
 	//// Socket en mode ecoute ////
-	
+
 	if(listen(_listenerSock, SOMAXCONN) < 0) // check max listened sockets
 		return -1;
 	Server::set_Event(_listenerSock, POLLIN);
@@ -115,16 +115,16 @@ int		Server::polling()
 			// if (_pfds[i].fd == _listenerSock)					// Server socket waiting read
 			// {
 				// if (Server::connection() == -1)
-					// return -1;	
+					// return -1;
 			// }
 			// else
 			// {
-				// 
+				//
 			// }												//Client socket waiting for read
-// 
-			// 
+//
+			//
 		// }
-		
+
 	// }
 	return 0;
 }
@@ -132,7 +132,7 @@ int		Server::polling()
 int		Server::waitClient()
 {
 	Server::polling();
-	
+
 	return 0;
 }
 
@@ -141,7 +141,7 @@ int		Server::connection()
 	struct sockaddr_in clientInfo;
 	socklen_t clientSize = sizeof(clientInfo);
 	char buf[4096];
-	
+
 	std::cout << std::endl << " 3) Server waiting for client ..." << std::endl;
 	 ///// Accepte une requete de connexion entrante /////
 
@@ -149,7 +149,7 @@ int		Server::connection()
 	if (clientSock < 0)
 		return -1;
 	std::cout << std::endl << " 3) Server accepting one connection ..." << std::endl;
-	
+
 	std::string hello = "hello";
 	///// Boucle de lecture des msg recus ///////
 	while (true)
@@ -168,13 +168,13 @@ int		Server::connection()
 			User  *U =  new  User(hello);
 			Users.insert(std::pair<int, User*>(clientSock, U));
 			std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-			Command cmd(buf, Users);
+			Command cmd(buf, Users, clientSock);
 		}
 	}
 	// close(clientSock); // a enlever
 
-	return 0; 
-	
+	return 0;
+
 }
 
 void    Server::sendmsg(int clientSock, std::string msg)
@@ -201,7 +201,7 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 {
 	(void)input_passwd; // a surement enlever
 	char* port_str = const_cast<char*>(input_port.c_str());
-	
+
 	if (input_port.length() == 4 && isdigit(port_str[0]))
 	{
 		int port = atoi(input_port.c_str());
@@ -213,17 +213,17 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 	return false;
 }
 
-const char* Server::NotValidArgsException::what() const throw() 
+const char* Server::NotValidArgsException::what() const throw()
 {
   return "Argument aren't valid";
 }
 
-const char* Server::SocketFailedException::what() const throw() 
+const char* Server::SocketFailedException::what() const throw()
 {
   return "Socket Failed";
 }
 
-const char* Server::ClientConnectionFailedException::what() const throw() 
+const char* Server::ClientConnectionFailedException::what() const throw()
 {
   return "Client connection Failed";
 }
