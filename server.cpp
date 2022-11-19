@@ -6,12 +6,11 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/18 20:16:28 by mettien          ###   ########.fr       */
+/*   Updated: 2022/11/19 22:56:16 by ldinguir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
-
 
 Server::Server(std::string input_port, std::string input_passwd)
 {
@@ -167,7 +166,7 @@ int		Server::connection()
 		{
 			User  *U =  new  User(hello);
 			Users.insert(std::pair<int, User*>(clientSock, U));
-			std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+			std::cout << COLOR(CYAN, "Received from Client: " + std::string(buf, 0, byteRcv)) << std::endl;
 			Command cmd(buf, Users);
 		}
 	}

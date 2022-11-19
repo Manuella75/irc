@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/18 20:16:34 by mettien          ###   ########.fr       */
+/*   Updated: 2022/11/19 22:06:13 by ldinguir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,13 @@
 #include <poll.h>
 #include "../Command/Command.hpp"
 #include "../Command/User.hpp"
+
+/* Utils pour les couleurs */
+#define CYAN    "\033[36m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define RESET   "\033[0m"
+#define COLOR(C, M) C << M << RESET
 
 // class Command;
 // class User;

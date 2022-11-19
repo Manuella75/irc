@@ -103,7 +103,8 @@ Command::Command(std::string msg, std::map<int, User*> Users) : _BrutMsg(msg), _
 	}
 	std::cout << "CMD = " << this->_cmd << std::endl << "ARGS = " << this->_args << std::endl; // A supp
 
-	ft_exec_cmd(this->_cmd); // code retour ?? 
+	ft_exec_cmd(this->_cmd); // code retour ??
+	C
 	return ;
 }
 
