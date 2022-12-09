@@ -114,6 +114,7 @@ Command::Command(std::string msg, std::map<int, User*> Users, int clientSock) : 
 	std::cout << "CMD = " << this->_cmd << std::endl << "ARGS = " << this->_args << std::endl; // A supp
 
 	ft_exec_cmd(this->_cmd, Users, clientSock); // code retour ??
+	//:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n
 	return ;
 }
 
