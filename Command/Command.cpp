@@ -32,7 +32,7 @@ int	nick(User  U)
 {
 	std::cout <<  U.getUserHost() << std::endl;
 	return (0);
-	}
+}
 // int	notice(void){return (0);}
 // int	oper(void){return (0);}
 // int	part(void){return (0);}
@@ -60,8 +60,15 @@ int	nick(User  U)
 // int	whois(void){return (0);}
 // int	whowas(void){return (0);}
 
-int	ft_exec_cmd(std::string cmd,std::map<int, User *> Users, int clientSock)
+int	ft_exec_cmd(std::string cmd,std::map<int, User *> Users, int clientSock, struct sockaddr_in clientAddress)
 {
+		std::cout << " ell" << std::endl;
+		usleep(1000);
+		if (sendto(clientSock, "test", 5, 0,
+	(struct sockaddr *) &clientAddress,
+	sizeof(clientAddress)) < 0)
+		std::cout << "Impo" << std::endl;
+	return (-1) ; // aucune commande ne correspond // verifier code d'erreur dans la doc IRC
 	// std::string command[55] = {"ADMIN", "AKILL", "AWAY", "CLEANDEAD", "CLEARAKILLS", "CONNECT", "DIE", "EXPBAN", "GLOBOPS", "HELP", "IMPORTMOTD", "INFO", "INVITE", "ISBANNED", "ISON", "JOIN", "KICK", "KILL", "KILLBAN", "KLINE", "LINKS", "LIST", "LUSERS", "ME", "MODE", "MOTD", "MSG", "NAMES", "NICK", "NOTICE", "OPER", "PART", "PASS", "PRIVMSG", "QUERY", "QUIT", "RAKILL", "REHASH", "SHUN", "SILENCE", "SQUIT", "STATS", "SUMMON", "TIME", "TOPIC", "UNBAN", "UNKLINE", "USERHOST", "USERS", "VERSION", "WALL", "WALLOPS", "WHO", "WHOIS", "WHOWAS"};
 	std::string command[1] = {"NICK"};
 
@@ -81,12 +88,11 @@ int	ft_exec_cmd(std::string cmd,std::map<int, User *> Users, int clientSock)
 			return (ret); // verifier code d'erreurs dans la doc IRC
 		// }
 	// }
-	return (-1) ; // aucune commande ne correspond // verifier code d'erreur dans la doc IRC
 }
 
 /* Constructor */
 
-Command::Command(std::string msg, std::map<int, User*> Users, int clientSock) : _BrutMsg(msg), _cmd("") ,_args("")
+Command::Command(std::string msg, std::map<int, User*> Users, int clientSock, struct sockaddr_in clientInfo) : _BrutMsg(msg), _cmd("") ,_args("")
 {
 	size_t	pos;
 
@@ -113,7 +119,7 @@ Command::Command(std::string msg, std::map<int, User*> Users, int clientSock) : 
 	}
 	std::cout << "CMD = " << this->_cmd << std::endl << "ARGS = " << this->_args << std::endl; // A supp
 
-	ft_exec_cmd(this->_cmd, Users, clientSock); // code retour ??
+	ft_exec_cmd(this->_cmd, Users, clientSock, clientInfo); // code retour ??
 	//:<nickname>@<username>!<hostname> <COMMAND> <arg>\r\n
 	return ;
 }

@@ -8,7 +8,7 @@ FLAGS = -Wall -Wextra -Werror -std=c++98
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:%.cpp=%.o))
 
-SRC =   main.cpp\
+SRC =   bot.cpp\
 
 all:  $(NAME)
 

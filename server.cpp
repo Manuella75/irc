@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/18 21:25:26 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/11 22:09:54 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int		Server::connection()
 			User  *U =  new  User(hello);
 			Users.insert(std::pair<int, User*>(clientSock, U));
 			std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-			Command cmd(buf, Users, clientSock);
+			Command cmd(buf, Users, clientSock, clientInfo);
 		}
 	}
 	// close(clientSock); // a enlever

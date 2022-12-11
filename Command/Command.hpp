@@ -4,6 +4,7 @@
 # include <iostream>
 # include <cctype>
 #include <map>
+#include "../includes/server.hpp"
 #include "User.hpp"
 
 class	Command
@@ -18,7 +19,7 @@ class	Command
 	public :
 
 	/* Constructor */
-	Command(std::string cmd, std::map<int, User*> Users, int clientSock);
+	Command(std::string cmd, std::map<int, User*> Users, int clientSock, struct sockaddr_in clientInfo);
 	/* Destructor */
 	~Command(void);
 };
