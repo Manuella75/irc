@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/11 22:09:54 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/13 17:28:01 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,9 +166,11 @@ int		Server::connection()
 		else
 		{
 			User  *U =  new  User(hello);
-			Users.insert(std::pair<int, User*>(clientSock, U));
+			std::map<int, User *>::iterator it = Users.find(clientSock);
+			if (it == Users.end())
+				Users.insert(std::pair<int, User*>(clientSock, U));
 			std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-			Command cmd(buf, Users, clientSock, clientInfo);
+			Command cmd(buf, Users, clientSock);
 		}
 	}
 	// close(clientSock); // a enlever
