@@ -6,12 +6,11 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/18 20:16:28 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/16 19:18:19 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
-
 
 Server::Server(std::string input_port, std::string input_passwd)
 {
@@ -20,26 +19,20 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_port = atoi(input_port.c_str());
 	this->_passwd = input_passwd;
 	this->_listenerSock = 0;
-	this->_sock = 0;
-	this->_lastFd = 0;
-	
+	this->_sock = 0; // * utile? *
+	this->_fdCount = 0;
 }
 
-Server::~Server(){}
+Server::~Server() {}
 
-void	Server::run()
+void Server::run()
 {
-	if (Server::createSocket() == -1)
+	if (Server::createSocket() == -1)                 // Creation du socket du serveur
 		throw SocketFailedException();
-	Server::set_Event(_listenerSock, POLLIN);
+	Server::setEvent(_listenerSock, POLLIN);         // Ajout du sock serveur a la liste des fds
 	while (true)
 	{
-		// if (Server::polling() == -1);
-			// throw ClientConnectionFailedException();
-		// if (Server::waitClient() == -1)
-			// throw ClientConnectionFailedException();
-		int clientSock = Server::connection();
-		if (clientSock == -1)
+		if (Server::waitConnection() == -1)
 			throw ClientConnectionFailedException();
 	}
 }
@@ -47,115 +40,104 @@ void	Server::run()
 int Server::createSocket()
 {
 	///////  Creation du socket  ////////
-	
+
 	_listenerSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listenerSock == -1)
 		return -1;
-	// if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en non bloquant
-		// return -1;
+	if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en mode non bloquant
+	return -1;
 	std::cout << std::endl << " 1) Socket created" << std::endl;
-	
+
 	/////// Set up des caracteristiques du socket //////
-	
-	struct sockaddr_in listenerInfo;  					// sous forme d'une struct
-	memset(&listenerInfo, 0, sizeof(listenerInfo)); 	// initialisation de la struct de 0
-	listenerInfo.sin_family = AF_INET;  				// son type : Internet Protocol V4
-	listenerInfo.sin_port = htons(this->_port);  		// son port d'ecoute: argv[1]
+
+	struct sockaddr_in listenerInfo;				  	// sous forme d'une struct
+	memset(&listenerInfo, 0, sizeof(listenerInfo));	  	// initialisation de la struct de 0
+	listenerInfo.sin_family = AF_INET;				  	// son type : Internet Protocol V4
+	listenerInfo.sin_port = htons(this->_port);		  	// son port d'ecoute: argv[1]
 	listenerInfo.sin_addr.s_addr = htonl(INADDR_ANY); 	// son Ip : Localhost //
-	if (listenerInfo.sin_addr.s_addr == INADDR_NONE)	// traitement d'erreur
-    	return -1;
-	
+	if (listenerInfo.sin_addr.s_addr == INADDR_NONE)  	// traitement d'erreur
+		return -1;
+
 	//////// Lier le socket aux caract fournies( adresse IP + port) ////////
-	
+
 	if (bind(_listenerSock, (struct sockaddr *)&listenerInfo, sizeof(listenerInfo)) < 0)
 		return -1;
 	std::cout << std::endl << " 2) Socket bounded" << std::endl;
-	
+
 	//// Socket en mode ecoute ////
-	
-	if(listen(_listenerSock, SOMAXCONN) < 0) // check max listened sockets
+
+	if (listen(_listenerSock, SOMAXCONN) < 0) /* check max listened sockets */
 		return -1;
-	Server::set_Event(_listenerSock, POLLIN);
+	Server::setEvent(_listenerSock, POLLIN);
 	return 0;
 }
 
-void	Server::set_Event(int sock, int event) //changer le nom par add user/fd
+void Server::setEvent(int sock, int event) /* changer le nom par add user/fd */
 {
-	_pfds[_lastFd].fd = sock;
-	_pfds[_lastFd].events = event;
-	std::cout<< "back" << _pfds[_lastFd].fd << std::endl;
-	std::cout<< "back" << _pfds[_lastFd].events << std::endl;
-	_lastFd++;
+	/////   Set up des evenements du fd   /////
+	
+	_pfds[_fdCount].fd = sock;
+	_pfds[_fdCount].events = event;
+	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
+	_fdCount++; 										// incrementation du nb de fd //
 }
 
-int		Server::polling()
+int Server::waitConnection()
 {
-	// static int i;
-
-	int i = 0;
-	// _pfds[i].fd = sock;
-	// _pfds[i].events = event;
-	// std::cout<< "back" << _pfds[0].fd << std::endl;
-	// std::cout<< "back" << _pfds[0].events << std::endl;
-	int res_event = poll(&_pfds[i], _lastFd , -1); // changer le timeout
-	std::cout << res_event << std::endl;
-	std::cout << _pfds[i].revents << std::endl;
+	std::cout << std::endl<< " 3) Server waiting for some event ..." << std::endl;
+	
+	int res_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
+	std::cout << "Poll result : " << res_event << std::endl;
+	std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
 	if (res_event == -1)
+	{
+		std::cout << "Poll failed " << std::endl;
 		return -1;
+	}
 	if (res_event == 0)
 	{
-		std::cout << "Time out for socket" << std::endl;
+		std::cout << "Time out for socket" << std::endl; /* voir retour de ce cas */
+		return -1;
 	}
-	// for (i = 0; i < _lastFd; i++)
-	// {
-		// if (_pfds[i].revents == POLLERR|POLLHUP)
-			// std::cout << " Revent socket problem" << std::endl;
-		// if (_pfds[i].events == POLLIN) 							// A socket waiting for read
-		// {
-			// if (_pfds[i].fd == _listenerSock)					// Server socket waiting read
-			// {
-				// if (Server::connection() == -1)
-					// return -1;	
-			// }
-			// else
-			// {
-				// 
-			// }												//Client socket waiting for read
-// 
-			// 
-		// }
-		
-	// }
-	return 0;
-}
 
-int		Server::waitClient()
-{
-	Server::polling();
+	/////  Boucle d'attente de connexions entrantes ou existantes   ///////
 	
+	for (int i = 0; i < _fdCount; i++)
+	{
+		if (_pfds[i].revents == POLLIN) 				// Un socket en attente de lecture
+		{
+			if (_pfds[i].fd == _listenerSock) 			
+			{
+				if (Server::newClient() == -1)			// Cas du socket du serveur
+					return -1;
+			}
+			else 										
+			{
+				if (Server::rcvFromClient(_pfds[i].fd) == -1)		// Cas du socket d'un client
+					return -1;
+			}
+		}
+		else
+		{
+			std::cout << " Error! Revent" << _pfds[i].revents << std::endl;
+			return -1;
+		}
+	}
 	return 0;
 }
 
-int		Server::connection()
+int Server::rcvFromClient(int fd)
 {
-	struct sockaddr_in clientInfo;
-	socklen_t clientSize = sizeof(clientInfo);
+	std::cout << std::endl << " 3) Server receving data ..." << std::endl;
+	
 	char buf[4096];
 	
-	std::cout << std::endl << " 3) Server waiting for client ..." << std::endl;
-	 ///// Accepte une requete de connexion entrante /////
-
-	int clientSock = accept(_listenerSock, (struct sockaddr*)&clientInfo, &clientSize);
-	if (clientSock < 0)
-		return -1;
-	std::cout << std::endl << " 3) Server accepting one connection ..." << std::endl;
+	/////  Reception de toutes les donnees sur le socket client   /////
 	
-	std::string hello = "hello";
-	///// Boucle de lecture des msg recus ///////
 	while (true)
 	{
-		memset (buf, 0, 4096); // size adequate?
-		int byteRcv = recv(clientSock, buf, 4096, 0);
+		memset(buf, 0, 4096); 			// * size adequate? *
+		int byteRcv = recv(_listenerSock, buf, 4096, 0);		// Reception des string
 		if (byteRcv == -1)
 			return -1;
 		else if (byteRcv == 0)
@@ -163,33 +145,51 @@ int		Server::connection()
 			std::cout << "The client disconnected" << std::endl;
 			break;
 		}
-		else
-		{
-			User  *U =  new  User(hello);
-			Users.insert(std::pair<int, User*>(clientSock, U));
-			std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-			Command cmd(buf, Users);
-		}
+		User *U = new User("hello");
+		Users.insert(std::pair<int, User *>(fd, U));
+		std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+		Command cmd(buf, Users);
 	}
-	// close(clientSock); // a enlever
+	return 0;
+}
 
-	return 0; 
+int Server::newClient()
+{
+	int newClient = 0;
+	// struct sockaddr_in Client;
+	// socklen_t ClientSize = sizeof(Client);
+
+	///// Accepte les requetes de connexion entrante /////
 	
+	std::cout << std::endl << " 3) Server waiting for the client ..." << std::endl;
+	std::cout << newClient << std::endl;
+	do
+	{
+		std::cout << newClient << std::endl;
+		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
+		std::cout << newClient << std::endl;
+		if (newClient < 0)
+			return -1;
+		std::cout << std::endl << " 4) Server accepting one connection ..." << std::endl;
+		Server::setEvent(newClient, POLLIN);
+
+	} while (newClient != -1); // * condition a revoir * //
+	return 0;
 }
 
-void    Server::sendmsg(int clientSock, std::string msg)
+void Server::sendmsg(int newClient, std::string msg)
 {
-	send(clientSock, msg.c_str(), msg.length(), 0); // a revoir pour le non bloquant + flag + erreurs (msg.cstr + 1?)
+	send(newClient, msg.c_str(), msg.length(), 0); // * a revoir pour le non bloquant + flag + erreurs (msg.cstr + 1?) *
 }
 
-int		Server::getPort() const
+int Server::getPort() const
 {
-    return(this->_port);
+	return (this->_port);
 }
 
 std::string Server::getPasswd() const
 {
-    return(this->_passwd);
+	return (this->_passwd);
 }
 
 bool Server::hasPasswd() const
@@ -199,13 +199,13 @@ bool Server::hasPasswd() const
 
 bool Server::valid_args(std::string input_port, std::string input_passwd)
 {
-	(void)input_passwd; // a surement enlever
-	char* port_str = const_cast<char*>(input_port.c_str());
-	
+	(void)input_passwd; // * a surement enlever *
+	char *port_str = const_cast<char *>(input_port.c_str());
+
 	if (input_port.length() == 4 && isdigit(port_str[0]))
 	{
 		int port = atoi(input_port.c_str());
-		if (port < 6665 || port > 6669) // c'est ok?
+		if (port < 6665 || port > 6669) // * c'est ok? *
 			return false;
 		return true;
 	}
@@ -213,17 +213,17 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 	return false;
 }
 
-const char* Server::NotValidArgsException::what() const throw() 
+const char *Server::NotValidArgsException::what() const throw()
 {
-  return "Argument aren't valid";
+	return "Argument aren't valid";
 }
 
-const char* Server::SocketFailedException::what() const throw() 
+const char *Server::SocketFailedException::what() const throw()
 {
-  return "Socket Failed";
+	return "Socket Failed";
 }
 
-const char* Server::ClientConnectionFailedException::what() const throw() 
+const char *Server::ClientConnectionFailedException::what() const throw()
 {
-  return "Client connection Failed";
+	return "Client connection Failed";
 }
