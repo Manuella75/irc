@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/16 19:16:14 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/17 07:30:46 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <cerrno> // a enlever
+#include <cerrno>
 #include <map>
 #include <vector>
 #include <poll.h>
@@ -57,7 +58,7 @@ private:
     int createSocket();
     
     // Set up fd //
-    void setEvent(int sock, int event); // add a fd to the map
+    void add_fd_ToList(int sock, int event, int isServer); // add a fd to the map
 
     // Wait for a connection //
     int waitConnection();

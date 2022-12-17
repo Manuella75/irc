@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/16 19:18:19 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/17 09:12:37 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_passwd = input_passwd;
 	this->_listenerSock = 0;
 	this->_sock = 0; // * utile? *
-	this->_fdCount = 0;
+	this->_fdCount = 1;
 }
 
 Server::~Server() {}
@@ -29,7 +29,7 @@ void Server::run()
 {
 	if (Server::createSocket() == -1)                 // Creation du socket du serveur
 		throw SocketFailedException();
-	Server::setEvent(_listenerSock, POLLIN);         // Ajout du sock serveur a la liste des fds
+	// Server::setEvent(_listenerSock, POLLIN);         // Ajout du sock serveur a la liste des fds
 	while (true)
 	{
 		if (Server::waitConnection() == -1)
@@ -68,27 +68,42 @@ int Server::createSocket()
 
 	if (listen(_listenerSock, SOMAXCONN) < 0) /* check max listened sockets */
 		return -1;
-	Server::setEvent(_listenerSock, POLLIN);
+	Server::add_fd_ToList(_listenerSock, POLLIN, 1);
 	return 0;
 }
 
-void Server::setEvent(int sock, int event) /* changer le nom par add user/fd */
+void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom par add user/fd */
 {
 	/////   Set up des evenements du fd   /////
 	
-	_pfds[_fdCount].fd = sock;
-	_pfds[_fdCount].events = event;
+	pollfd  pfd;
+	pfd.fd = sock;
+	pfd.events = event;
+	if (isServer)
+		_fdCount = 0;
+	std::cout << _fdCount << std::endl;
+	_pfds.insert(std::pair<int, pollfd>(_fdCount, pfd));
 	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
-	_fdCount++; 										// incrementation du nb de fd //
+	std::cout << "----- FD MAP -----" << std::endl;
+	std::map<int, pollfd> :: iterator it;
+   	for(it = _pfds.begin(); it != _pfds.end(); ++it)
+	{
+	    std::cout << "Index: " << it->first << "| Fd: " << it->second.fd << "| Event:  " << it->second.events << std::endl;
+	}
+	std::cout << "------------------" << std::endl << std::endl;
+	// if (!isServer)
+	_fdCount++;		
+	std::cout << _fdCount << std::endl;	
 }
 
 int Server::waitConnection()
 {
-	std::cout << std::endl<< " 3) Server waiting for some event ..." << std::endl;
-	
-	int res_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
+	int res_event = 0;
+	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
+	_pfds[0].revents = 0;
+	res_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
 	std::cout << "Poll result : " << res_event << std::endl;
-	std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
+	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
 	if (res_event == -1)
 	{
 		std::cout << "Poll failed " << std::endl;
@@ -101,26 +116,27 @@ int Server::waitConnection()
 	}
 
 	/////  Boucle d'attente de connexions entrantes ou existantes   ///////
-	
-	for (int i = 0; i < _fdCount; i++)
+	// std::cout << _fdCount << "|" << current_size << std::endl;
+	int currentSize = _fdCount;
+	for (int i = 0; i < currentSize; i++)
 	{
-		if (_pfds[i].revents == POLLIN) 				// Un socket en attente de lecture
+		std::cout << _fdCount << "|" << currentSize << std::endl;
+		if (_pfds[i].revents == 0) 								// Ce socket n'a pas fait d'appel
+			continue;
+		if (_pfds[i].revents != POLLIN)
 		{
-			if (_pfds[i].fd == _listenerSock) 			
-			{
-				if (Server::newClient() == -1)			// Cas du socket du serveur
-					return -1;
-			}
-			else 										
-			{
-				if (Server::rcvFromClient(_pfds[i].fd) == -1)		// Cas du socket d'un client
-					return -1;
-			}
-		}
-		else
-		{
-			std::cout << " Error! Revent" << _pfds[i].revents << std::endl;
+			std::cout << "Error! Revent: " << _pfds[i].revents << " on index " << i << std::endl;
 			return -1;
+		}
+		if (_pfds[i].fd == _listenerSock) 			
+		{
+			if (Server::newClient() == -1)						// Cas du socket du serveur
+				return -1;
+		}
+		else 										
+		{
+			if (Server::rcvFromClient(_pfds[i].fd) == -1)		// Cas du socket d'un client
+				return -1;
 		}
 	}
 	return 0;
@@ -128,7 +144,7 @@ int Server::waitConnection()
 
 int Server::rcvFromClient(int fd)
 {
-	std::cout << std::endl << " 3) Server receving data ..." << std::endl;
+	std::cout << std::endl << "4) Server receving data ..." << std::endl;
 	
 	char buf[4096];
 	
@@ -142,7 +158,7 @@ int Server::rcvFromClient(int fd)
 			return -1;
 		else if (byteRcv == 0)
 		{
-			std::cout << "The client disconnected" << std::endl;
+			std::cout << "5) The client disconnected" << std::endl;
 			break;
 		}
 		User *U = new User("hello");
@@ -156,23 +172,23 @@ int Server::rcvFromClient(int fd)
 int Server::newClient()
 {
 	int newClient = 0;
-	// struct sockaddr_in Client;
-	// socklen_t ClientSize = sizeof(Client);
 
 	///// Accepte les requetes de connexion entrante /////
 	
-	std::cout << std::endl << " 3) Server waiting for the client ..." << std::endl;
-	std::cout << newClient << std::endl;
+	std::cout << std::endl << " 4) Server waiting for the client ..." << std::endl;
 	do
 	{
-		std::cout << newClient << std::endl;
 		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
-		std::cout << newClient << std::endl;
+		std::cout << "Accept() = "<< newClient << std::endl;
 		if (newClient < 0)
-			return -1;
-		std::cout << std::endl << " 4) Server accepting one connection ..." << std::endl;
-		Server::setEvent(newClient, POLLIN);
-
+		{
+			if (errno != EWOULDBLOCK)
+				return -1;
+			std::cout << errno << " - " << strerror(errno) << std::endl;
+			break;
+		}
+		std::cout << std::endl << " 5) Server accepting one connection ..." << std::endl;
+		Server::add_fd_ToList(newClient, POLLIN, 0);
 	} while (newClient != -1); // * condition a revoir * //
 	return 0;
 }
