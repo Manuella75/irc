@@ -7,8 +7,9 @@
 	// return ;
 // }
 
-User::User (std::string host) : _UserHost(host)
+User::User (std::string host) : _UserHosts(host)
 {
+	mode = 0;
 	_UserNick = "";
 
 }
@@ -19,14 +20,14 @@ User::User(User const & cpy){
 
 User & User::operator=(User const & rhs)
 {
-	this->_UserHost = rhs.getUserHost();
+	this->_UserHosts = rhs.getUserHost();
 	// this->_UserNick = rhs.getUserNick();
 	return *this;
 }
 
 std::string const & User::getUserHost() const
 {
-	return _UserHost;
+	return _UserHosts;
 }
 
 std::string  User::getUserNick()
