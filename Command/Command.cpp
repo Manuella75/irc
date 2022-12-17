@@ -1,5 +1,7 @@
 #include "Command.hpp"
 
+
+
 // 431: ERR_NONICKNAMEGIVEN: No nickname given
 // 432: ERR_ERRONEUSNICKNAME: Erroneous nickname
 // 433: ERR_NICKNAMEINUSE: Nickname is already in use
@@ -9,32 +11,55 @@
 
 int	Command::nick(User  U)
 {
-	std::cout << " here" << std::endl;
-	if (_cmd.size())
-	{
+	// Vérifie qu'il y a bien un argument
+	if (arguments.empty()) {
 		reply(431);
-		return -1;
+	return -1;
 	}
-	U.getUserNick() = _cmd[0];
-	std::cout <<  U.getUserNick() << std::endl;
+	std::map<int, User *>::const_iterator it;
+  	for (it = Users.begin(); it != Users.end(); ++it)
+	{
+		if (arguments[0] == it->second->getUserNick())
+			reply(433);
+		return (-1);
+	}
+	U.getUserNick() = arguments[1];
+
 	return (0);
 }
 //USER <username> <mode> <unused> <realname>
-
+/// ?USER <username> <hostname> <realname>
 int	Command::user(User  U)
 {
 	// error 461
-	// error 462
-	//maybe more
-	// U.username = _cmd[1];
-	// U.mode = _cmd[2];
-	// U.realname = _cmd[3];
-	(void)U;
+	if (arguments.empty())
+	{
+		reply(461);
+		return (-1);
+	}
+	if (U.username.size() != 0)
+	{
+		reply(462);
+		return (-1);
+	}
 
+
+	U.username = arguments[0];
+	U.mode = atoi(arguments[1].c_str());
+	U.realname = arguments[2];
 
 	return (1);
 }
-// int	whois(void){return (0);}
+
+int	Command::whois(User U)
+{
+	// a voir pour l envoie au client
+	std::cout << U.getUserNick() << std::endl;
+	 std::string reponse = ":localhost 311 " + U.username +
+	 " utilisateur utilisateur * :Nom réel\r\n";
+	send(U.socket, reponse.c_str(), reponse.size(), 0);
+	return (0);
+}
 
 
 template <typename T>
@@ -45,14 +70,13 @@ void printVector(const std::vector<T>& v) {
   }
   std::cout << std::endl;
 }
-int	Command::ft_exec_cmd(std::map<int, User *> Users, int clientSock)
+
+int	Command::ft_exec_cmd(int clientSock)
 {
-	std::string command[2] = {"NICK", "USER"};
+	std::string command[3] = {"NICK", "USER", "WHOIS"};
 
 	std::map<int, User *>::iterator it = Users.find(clientSock);
-
-	// int	(*functptr[])() = {&admin, &akill, &away, &cleandead, &clearakills, &connect, &die, &expban, &globops, &help, &importmotd, &info, &invite, &isbanned, &ison, &join, &kick, &kill, &killban, &kline, &links, &list, &lusers, &me, &mode, &motd, &msg, &names, &nick, &notice, &oper, &part, &pass, &privmsg, &query, &quit, &rakill, &rehash, &shun, &silence, &squit, &stats, &summon, &time, &topic, &unban, &unkline, &userhost, &users, &version, &wall, &wallops, &who, &whois, &whowas};
-	int	(Command::*functptr[])(User) = {&Command::nick, &Command::user};
+	int	(Command::*functptr[])(User) = {&Command::nick, &Command::user, &Command::whois};
 
 	int	ret;
 	for (int i = 0; i < 2; i++)
@@ -68,19 +92,22 @@ int	Command::ft_exec_cmd(std::map<int, User *> Users, int clientSock)
 
 /* Constructor */
 
-Command::Command(std::string msg, std::map<int, User*> Users, int clientSock) : _BrutMsg(msg)
+Command::Command(std::string msg, std::map<int, User*> Us, int clientSock) : _BrutMsg(msg)
 {
+	 std::string reponse = ":localhost 311";
+	send(clientSock, reponse.c_str(), reponse.size(), 0);
 	std::istringstream ss(msg);
-
+	Users = Us;
 	std::string token;
 	while (std::getline(ss, token, ' '))
 	{
-		_cmd.push_back(token);
+		arguments.push_back(token);
 	}
-	_command = _cmd[0];
-	printVector(_cmd);
+	_command = arguments[0];
+	arguments.erase(arguments.begin());
+	printVector(arguments);
 	std::cout << "Constructeur called for : " << this->_BrutMsg << std::endl; // A supp
-	ft_exec_cmd(Users, clientSock); // code retour ??
+	ft_exec_cmd(clientSock); // code retour ??
 	return ;
 }
 

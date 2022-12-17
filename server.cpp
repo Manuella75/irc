@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/13 17:28:01 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/17 17:23:25 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,7 @@ int		Server::connection()
 		else
 		{
 			User  *U =  new  User(hello);
+			U->socket = clientSock;
 			std::map<int, User *>::iterator it = Users.find(clientSock);
 			if (it == Users.end())
 				Users.insert(std::pair<int, User*>(clientSock, U));

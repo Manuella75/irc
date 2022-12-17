@@ -3,20 +3,23 @@
 
 # include <iostream>
 #include <string>
+#include <map>
 
 class	User
 {
 	private :
 
-	std::string	_UserNick;
+	std::string	Nickname;
 	// std::string	_UserName;
 	// std::string	_UserPassword;
 	std::string	_UserHosts;
-	std::string  usernamer;
-	int  mode;
-	std::string realname;
 	public :
 
+	int socket;
+	std::map<int, User *> Users;
+	std::string  username;
+	int  mode;
+	std::string realname;
 	/* Constructor */
 	User(std::string host);
 	User(User const & cpy);

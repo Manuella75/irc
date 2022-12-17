@@ -1,11 +1,12 @@
-NICK: This command is used to change a client's nickname.
-USER: This command is used to register a client's username and real name with the server.
-JOIN: This command is used to join a channel.
-PART: This command is used to leave a channel.
-PRIVMSG: This command is used to send a private message to another user or a channel.
-QUIT: This command is used to disconnect from the server.
-TOPIC: This command is used to view or set the topic of a channel.
-LIST: This command is used to list all channels on the server.
-NAMES: This command is used to list the users in a channel.
-WHOIS: This command is used to request information about a specific user.
-These commands are a core part of the IRC protocol and are used to perform basic communication and management tasks on an IRC server. You can find more information about these and other IRC commands in the IRC protocol specification.
+JOIN : permet à un utilisateur de rejoindre un canal (channel) sur le serveur.
+PART : permet à un utilisateur de quitter un canal sur le serveur.
+PRIVMSG : permet à un utilisateur d'envoyer un message privé à un autre utilisateur ou à un canal.
+NICK : permet à un utilisateur de changer son nom d'utilisateur.
+MODE : permet de changer les paramètres d'un canal ou d'un utilisateur.
+TOPIC : permet de changer le sujet d'un canal.
+INVITE : permet d'inviter un utilisateur à rejoindre un canal privé.
+KICK : permet d'expulser un utilisateur d'un canal.
+WHOIS : permet de récupérer des informations sur un utilisateur, comme son nom d'utilisateur, son adresse IP et son temps de connexion.
+QUIT : permet à un utilisateur de quitter le serveur IRC.
+ping
+user

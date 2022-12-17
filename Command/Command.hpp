@@ -19,7 +19,8 @@ class	Command
 	private :
 	std::string	_BrutMsg;
 	std::string _command;
-	std::vector<std::string> _cmd;
+	std::vector<std::string> arguments;
+	std::map<int, User *> Users;
 	// User		_User;
 
 
@@ -27,9 +28,10 @@ class	Command
 
 	/* Constructor */
 	Command(std::string cmd, std::map<int, User*> Users, int clientSock);
-	int	ft_exec_cmd(std::map<int, User *> Users, int clientSock);
+	int	ft_exec_cmd(int clientSock);
 	int	nick(User U);
 	int	user(User U);
+	int	whois(User U);
 	/* Destructor */
 	~Command(void);
 };

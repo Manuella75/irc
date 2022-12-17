@@ -10,7 +10,7 @@
 User::User (std::string host) : _UserHosts(host)
 {
 	mode = 0;
-	_UserNick = "";
+	Nickname = "";
 
 }
 
@@ -32,7 +32,7 @@ std::string const & User::getUserHost() const
 
 std::string  User::getUserNick()
 {
-	return _UserNick;
+	return Nickname;
 }
 /* Destructor */
 
