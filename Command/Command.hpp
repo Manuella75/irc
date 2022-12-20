@@ -11,8 +11,11 @@
 #include <sstream>
 #include <iostream>
 #include "Utils.hpp"
+#include "Channel.hpp"
 
 void reply(unsigned short code, std::string arg1 = "", std::string arg2 = "", std::string arg3 = "", std::string arg4 = "", std::string arg5 = "", std::string arg6 = "", std::string arg7 = "");
+class Channel;
+class User;
 
 class	Command
 {
@@ -21,7 +24,9 @@ class	Command
 	std::string _command;
 	std::vector<std::string> arguments;
 	std::map<int, User *> Users;
+	std::map<std::string, Channel *> Chan;
 	// User		_User;
+
 
 
 	public :
@@ -32,6 +37,8 @@ class	Command
 	int	nick(User U);
 	int	user(User U);
 	int	whois(User U);
+	int join(User U);
+	int part(User U);
 	/* Destructor */
 	~Command(void);
 };

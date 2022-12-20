@@ -4,18 +4,23 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <iostream>
+#include "User.hpp"
 
 class Channel
 {
 	private:
-		std::string name; // channel name
-		std::string topic; // chanel topic
-		std::map<int, User *> Users; // channel users
-		std::string mode; // channel mode
-		std::map<int, std::string> user_mode; // user mode
-		std::string key; // channel key in channels map
-		std::string max_users; // max users
-		std::vector<User *> invited; // vector of invited users
+		std::string _name; // channel name
+		std::string _topic; // chanel topic
+		std::map<int, User *> _Users; // channel users
+		char  _mode; // channel mode
 	public :
-		std::string const & getName(); const
+	 	Channel(std::string const  name, User U);
+		~Channel();
+		std::string const & getName() const;
+		std::string const & getTopic() const;
+		std::map<int, User *>  & getUsers();
+		int  getMode() const;
+
 };
+#endif

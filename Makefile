@@ -6,14 +6,19 @@
 #    By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/10/19 16:53:48 by mettien           #+#    #+#              #
-#    Updated: 2022/12/16 22:21:33 by redarnet         ###   ########.fr        #
+#    Updated: 2022/12/20 17:09:53 by redarnet         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
 CC = c++
-SRCS = main.cpp server.cpp Command/User.cpp Command/Command.cpp Command/replies.cpp Command/Utils.cpp
+SRCS =	main.cpp\
+		server.cpp\
+		Command/User.cpp\
+		Command/Command.cpp\
+		Command/replies.cpp\
+		Command/Channel.cpp
 OBJS = ${SRCS:.cpp=.o}
 DEPS = ${SRCS:.cpp=.d}
 HEADER = ./includes

@@ -42,12 +42,9 @@ int	Command::user(User  U)
 		reply(462);
 		return (-1);
 	}
-
-
 	U.username = arguments[0];
 	U.mode = atoi(arguments[1].c_str());
 	U.realname = arguments[2];
-
 	return (1);
 }
 
@@ -61,25 +58,57 @@ int	Command::whois(User U)
 	return (0);
 }
 
+//Le client n'a pas les permissions nécessaires pour rejoindre le canal cible :
+// vous pouvez envoyer au client un message d'erreur "475"
+//Le client a déjà rejoint le canal cible : vous pouvez envoyer au client un message d'erreur "442" (You're already on that channel)
+// indiquant qu'il est déjà membre du canal cible.
 
-template <typename T>
-void printVector(const std::vector<T>& v) {
-  typename std::vector<T>::const_iterator it;
-  for (it = v.begin(); it != v.end(); ++it) {
-    std::cout << *it << " ";
-  }
-  std::cout << std::endl;
+int Command::join(User U)
+{
+	if (arguments.empty())
+		return -1;
+	// si le channel n existe pas > on le cree
+	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	if (it == Chan.end())
+	{
+		Channel *Cha =new Channel(arguments[0], U);
+		Chan.insert(std::pair<std::string, Channel *>(arguments[0], Cha));
+	}
+	// si le User est deja dans le channel
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U.socket);
+	if (itUser != it->second->getUsers().end())
+		return -1;
+	//on rajoute le User dans le Channel
+	User  *Us =  new  User(U);
+	it->second->getUsers().insert(std::pair<int, User *>(U.socket, Us));
+	return (0);
+}
+//permet de quitter un chanell
+int Command::part(User U)
+{
+	if (arguments.empty())
+		return -1;
+	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	//si le channel exist pas
+	if (it == Chan.end())
+		return -1;
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U.socket);
+	if (itUser != it->second->getUsers().end())
+		delete itUser->second;
+	it->second->getUsers().erase(U.socket);
+
+	return 0;
 }
 
 int	Command::ft_exec_cmd(int clientSock)
 {
-	std::string command[3] = {"NICK", "USER", "WHOIS"};
+	std::string command[5] = {"NICK", "USER", "WHOIS", "JOIN", "PART"};
 
 	std::map<int, User *>::iterator it = Users.find(clientSock);
-	int	(Command::*functptr[])(User) = {&Command::nick, &Command::user, &Command::whois};
+	int	(Command::*functptr[])(User) = {&Command::nick, &Command::user, &Command::whois, &Command::join, &Command::part};
 
 	int	ret;
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		if (command[i] == _command)
 		{

@@ -11,7 +11,6 @@ User::User (std::string host) : _UserHosts(host)
 {
 	mode = 0;
 	Nickname = "";
-
 }
 
 User::User(User const & cpy){
