@@ -10,3 +10,7 @@ WHOIS : permet de récupérer des informations sur un utilisateur, comme son nom
 QUIT : permet à un utilisateur de quitter le serveur IRC.
 ping
 user
+
+
+User 3 mode > 0 uti classic > 1 operator > 2 > pas dans un channel 
+join > operator si premier 

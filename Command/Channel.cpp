@@ -3,7 +3,8 @@
 Channel::Channel(std::string  name, User U) : _name(name)
 {
 	User  *Us =  new  User(U);
-	_Users.insert(std::pair<int , User *>(U.socket, Us));
+	U.setUserMode(1);
+	_Users.insert(std::pair<int , User *>(U.getUserSocket(), Us));
 
 }
 
@@ -19,12 +20,6 @@ std::string const & Channel::getTopic() const
 {
 	return _topic;
 }
-
-int Channel::getMode() const
-{
-	return _mode;
-}
-
 
 std::map<int, User *> & Channel::getUsers()
 {

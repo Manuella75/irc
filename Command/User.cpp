@@ -7,10 +7,11 @@
 	// return ;
 // }
 
-User::User (std::string host) : _UserHosts(host)
+User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
-	mode = 0;
-	Nickname = "";
+	_mode = 2;
+	_nickname = "";
+	_channel = "";
 }
 
 User::User(User const & cpy){
@@ -31,9 +32,33 @@ std::string const & User::getUserHost() const
 
 std::string  User::getUserNick()
 {
-	return Nickname;
+	return _nickname;
 }
-/* Destructor */
+
+int  User::getUserSocket()
+{
+	return _socket;
+}
+
+int  User::getUserMode()
+{
+	return _mode;
+}
+
+void  User::setUserMode(int mode)
+{
+	_mode = mode;
+}
+
+std::string  User::getUserChannel()
+{
+	return _channel;
+}
+
+void  User::setUserChannel(std::string chann)
+{
+	_channel = chann;
+}
 
 User::~User(void)
 {
