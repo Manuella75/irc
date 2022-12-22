@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/17 09:12:37 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/22 19:14:03 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
 	std::cout << "----- FD MAP -----" << std::endl;
 	std::map<int, pollfd> :: iterator it;
-   	for(it = _pfds.begin(); it != _pfds.end(); ++it)
+   	for(it = _pfds.begin(); it != _pfds.end(); it++)
 	{
 	    std::cout << "Index: " << it->first << "| Fd: " << it->second.fd << "| Event:  " << it->second.events << std::endl;
 	}
@@ -98,18 +98,22 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 
 int Server::waitConnection()
 {
-	int res_event = 0;
+	int nb_event = 0;
 	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
 	_pfds[0].revents = 0;
-	res_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
-	std::cout << "Poll result : " << res_event << std::endl;
+	for (int i = 0; i < _fdCount; i++)
+	{
+		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
+	}
+	nb_event = poll(&_pfds[0], _fdCount, 3600);  /* changer le timeout */
+	std::cout << "Poll result : " << nb_event << std::endl;
 	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
-	if (res_event == -1)
+	if (nb_event == -1)
 	{
 		std::cout << "Poll failed " << std::endl;
 		return -1;
 	}
-	if (res_event == 0)
+	if (nb_event == 0)
 	{
 		std::cout << "Time out for socket" << std::endl; /* voir retour de ce cas */
 		return -1;
@@ -175,7 +179,7 @@ int Server::newClient()
 
 	///// Accepte les requetes de connexion entrante /////
 	
-	std::cout << std::endl << " 4) Server waiting for the client ..." << std::endl;
+	std::cout << std::endl << "4) Server waiting for the client ..." << std::endl;
 	do
 	{
 		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
@@ -184,10 +188,10 @@ int Server::newClient()
 		{
 			if (errno != EWOULDBLOCK)
 				return -1;
-			std::cout << errno << " - " << strerror(errno) << std::endl;
+			// std::cout << errno << " - " << strerror(errno) << std::endl;
 			break;
 		}
-		std::cout << std::endl << " 5) Server accepting one connection ..." << std::endl;
+		std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
 		Server::add_fd_ToList(newClient, POLLIN, 0);
 	} while (newClient != -1); // * condition a revoir * //
 	return 0;
