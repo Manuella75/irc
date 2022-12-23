@@ -173,7 +173,7 @@ int	Command::ft_exec_cmd(int clientSock)
 
 Command::Command(std::string msg, std::map<int, User*> Us, int clientSock) : _BrutMsg(msg)
 {
-	 std::string reponse = ":localhost 311";
+	 std::string reponse = ":sender PRIVMSG redarnet ee\r\n";
 	send(clientSock, reponse.c_str(), reponse.size(), 0);
 	std::istringstream ss(msg);
 	Users = Us;

@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/20 18:44:34 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/23 20:03:26 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,6 +165,15 @@ int		Server::connection()
 		}
 		else
 		{
+			// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
+			std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
+			send(clientSock, reponse.c_str(), reponse.size(), 0);
+		//    reponse = ":127.0.0.1 002 redarnet :Your host is server, running version <version>\r\n";
+		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+		//    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
+		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+		// 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
+		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
 			User  *U =  new  User(hello, clientSock);
 			std::map<int, User *>::iterator it = Users.find(clientSock);
 			if (it == Users.end())
