@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/17 17:35:12 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/23 17:59:29 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,5 @@ int	main (int argc, char **argv)
 	-handle ip v6 ?
 	-handle les dependancies
 	-hamdle error msg	
+	-check pb fuser
  */

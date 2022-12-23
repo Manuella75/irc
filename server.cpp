@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/22 19:14:03 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/23 19:02:56 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int Server::createSocket()
 	if (_listenerSock == -1)
 		return -1;
 	if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en mode non bloquant
-	return -1;
+		return -1;
 	std::cout << std::endl << " 1) Socket created" << std::endl;
 
 	/////// Set up des caracteristiques du socket //////
@@ -76,23 +76,31 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 {
 	/////   Set up des evenements du fd   /////
 	
-	pollfd  pfd;
-	pfd.fd = sock;
-	pfd.events = event;
+	// pollfd  pfd;
+	// pfd.fd = sock;
+	// pfd.events = event;
 	if (isServer)
 		_fdCount = 0;
 	std::cout << _fdCount << std::endl;
-	_pfds.insert(std::pair<int, pollfd>(_fdCount, pfd));
+	// _pfds.insert(std::pair<int, pollfd>(_fdCount, pfd));
+	_pfds.push_back(pollfd());
+	_pfds.back().fd = sock;
+	_pfds.back().events = event;
+	_pfds.back().revents = 0;
 	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
 	std::cout << "----- FD MAP -----" << std::endl;
-	std::map<int, pollfd> :: iterator it;
+	std::vector<pollfd> :: iterator it;
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
 	{
-	    std::cout << "Index: " << it->first << "| Fd: " << it->second.fd << "| Event:  " << it->second.events << std::endl;
+	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
 	std::cout << "------------------" << std::endl << std::endl;
 	// if (!isServer)
-	_fdCount++;		
+	// {
+		// 
+		// Users.insert(std::pair<int, User *>(sock, U));
+	// }
+	_fdCount++;
 	std::cout << _fdCount << std::endl;	
 }
 
@@ -105,7 +113,7 @@ int Server::waitConnection()
 	{
 		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
 	}
-	nb_event = poll(&_pfds[0], _fdCount, 3600);  /* changer le timeout */
+	nb_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
 	std::cout << "Poll result : " << nb_event << std::endl;
 	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
 	if (nb_event == -1)
@@ -124,7 +132,7 @@ int Server::waitConnection()
 	int currentSize = _fdCount;
 	for (int i = 0; i < currentSize; i++)
 	{
-		std::cout << _fdCount << "|" << currentSize << std::endl;
+		// std::cout << _fdCount << "|" << currentSize << std::endl;
 		if (_pfds[i].revents == 0) 								// Ce socket n'a pas fait d'appel
 			continue;
 		if (_pfds[i].revents != POLLIN)
@@ -139,37 +147,35 @@ int Server::waitConnection()
 		}
 		else 										
 		{
-			if (Server::rcvFromClient(_pfds[i].fd) == -1)		// Cas du socket d'un client
+			if (Server::rcvFromClient(i, _pfds[i].fd) == -1)		// Cas du socket d'un client
 				return -1;
 		}
 	}
 	return 0;
 }
 
-int Server::rcvFromClient(int fd)
+int Server::rcvFromClient(int pos, int fd)
 {
 	std::cout << std::endl << "4) Server receving data ..." << std::endl;
 	
-	char buf[4096];
+	char buf[4096];								/* size adequate? */
 	
 	/////  Reception de toutes les donnees sur le socket client   /////
 	
-	while (true)
+	memset(buf, 0, 4096); 			
+	int byteRcv = recv(fd, buf, 4096, 0);							// Reception des strings
+	if (byteRcv == -1)
+		return -1;
+	else if (byteRcv == 0)
 	{
-		memset(buf, 0, 4096); 			// * size adequate? *
-		int byteRcv = recv(_listenerSock, buf, 4096, 0);		// Reception des string
-		if (byteRcv == -1)
-			return -1;
-		else if (byteRcv == 0)
-		{
-			std::cout << "5) The client disconnected" << std::endl;
-			break;
-		}
-		User *U = new User("hello");
-		Users.insert(std::pair<int, User *>(fd, U));
-		std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-		Command cmd(buf, Users);
+		std::cout << "5) The client disconnected" << std::endl;
+		_pfds.erase(_pfds.begin() + pos);
+		_fdCount--;
+		return 0;
 	}
+	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+	User *U =  new User(std::string(buf, 0, byteRcv));
+	Users.push_back(U);
 	return 0;
 }
 
@@ -183,6 +189,8 @@ int Server::newClient()
 	do
 	{
 		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
+		// if (fcntl(newClient, F_SETFL, O_NONBLOCK) < 0) 		// set le socket en mode non bloquant
+			// return -1;
 		std::cout << "Accept() = "<< newClient << std::endl;
 		if (newClient < 0)
 		{

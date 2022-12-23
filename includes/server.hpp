@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/17 07:30:46 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/23 18:17:50 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,11 @@ private:
     int                 _listenerSock;
     int                 _sock;    // 
     int                 _fdCount; // a changer par map des Users
-    std::map<int,pollfd> _pfds;
-
+    // std::map<int,pollfd> _pfds;
+    std::vector<pollfd> _pfds;
+    
     // Class //
-    std::map<int, User*> Users; 
+    std::vector<User *> Users;
     // Create a socket //
     int createSocket();
     
@@ -67,7 +68,7 @@ private:
     int newClient();
 
     // Receive data from Client //
-    int rcvFromClient(int fd);
+    int rcvFromClient(int pos, int fd);
     
 public:
 
