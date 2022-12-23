@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 19:02:56 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/23 22:37:53 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,11 +95,13 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
 	std::cout << "------------------" << std::endl << std::endl;
-	// if (!isServer)
-	// {
-		// 
-		// Users.insert(std::pair<int, User *>(sock, U));
-	// }
+	if (!isServer)
+	{
+		User *U =  new User("hello");
+		Users.insert(std::pair<int, User *>(sock, U));
+		std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
+		send(sock, response.c_str(), response.size(), 0);
+	}
 	_fdCount++;
 	std::cout << _fdCount << std::endl;	
 }
@@ -174,8 +176,7 @@ int Server::rcvFromClient(int pos, int fd)
 		return 0;
 	}
 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	User *U =  new User(std::string(buf, 0, byteRcv));
-	Users.push_back(U);
+	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
 	return 0;
 }
 

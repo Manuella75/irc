@@ -7,6 +7,7 @@
 	// return ;
 // }
 
+
 User::User (std::string command) : _cmd(command)
 {
 	std::cout << "Command: " << this->_cmd << std::endl;
@@ -21,6 +22,12 @@ User & User::operator=(User const & rhs)
 	this->_UserHost = rhs.getUserHost();
 	return *this;
 }
+
+void User::setCmd(std::string command)
+{
+	this->_cmd = command;
+}
+
 
 std::string const & User::getUserHost() const
 {

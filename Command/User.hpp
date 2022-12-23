@@ -27,6 +27,7 @@ class	User
 	~User(void);
 
 	/* Member functions */
+	void setCmd(std::string command);
 };
 
 #endif
