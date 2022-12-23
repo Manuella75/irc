@@ -7,8 +7,10 @@
 	// return ;
 // }
 
-User::User (std::string host) : _UserHost(host)
-{}
+User::User (std::string command) : _cmd(command)
+{
+	std::cout << "Command: " << this->_cmd << std::endl;
+}
 
 User::User(User const & cpy){
 	*this = cpy;

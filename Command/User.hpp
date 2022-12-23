@@ -9,6 +9,7 @@ class	User
 	private :
 
 	std::string	_UserNick;
+	std::string _cmd;
 	// std::string	_UserName;
 	// std::string	_UserPassword;
 	std::string	_UserHost;
@@ -16,7 +17,7 @@ class	User
 	public :
 
 	/* Constructor */
-	User(std::string host);
+	User(std::string cmd);
 	User(User const & cpy);
 	User &operator=(User const & rhs);
 	std::string const & getUserHost() const;
