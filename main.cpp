@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/16 18:47:03 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/23 21:51:48 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,6 @@ int	main (int argc, char **argv)
 	-handle ip v6 ?
 	-handle les dependancies
 	-hamdle error msg
+	-hamdle error msg
+	-check pb fuser
  */

@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/11/18 20:16:34 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/23 18:17:50 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <cerrno> // a enlever
+#include <cerrno>
 #include <map>
 #include <vector>
 #include <poll.h>
@@ -47,26 +48,27 @@ private:
     int                 _port;
     std::string         _passwd;
     int                 _listenerSock;
-    int                 _sock;
-    int                 _lastFd; // a changer par map des Users
-    std::map<int,pollfd> _pfds;
-
+    int                 _sock;    // 
+    int                 _fdCount; // a changer par map des Users
+    // std::map<int,pollfd> _pfds;
+    std::vector<pollfd> _pfds;
+    
     // Class //
-    std::map<int, User*> Users; 
+    std::vector<User *> Users;
     // Create a socket //
     int createSocket();
     
-    // Create polling sock //
-    int polling();
-    
     // Set up fd //
-    void set_Event(int sock, int event); // add a fd to the map
+    void add_fd_ToList(int sock, int event, int isServer); // add a fd to the map
 
     // Wait for a connection //
-    int waitClient();
+    int waitConnection();
     
     // Connection with clients
-    int connection();
+    int newClient();
+
+    // Receive data from Client //
+    int rcvFromClient(int pos, int fd);
     
 public:
 

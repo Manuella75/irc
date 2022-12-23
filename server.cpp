@@ -6,12 +6,11 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 20:03:26 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/23 21:51:17 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
-
 
 Server::Server(std::string input_port, std::string input_passwd)
 {
@@ -20,26 +19,20 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_port = atoi(input_port.c_str());
 	this->_passwd = input_passwd;
 	this->_listenerSock = 0;
-	this->_sock = 0;
-	this->_lastFd = 0;
-
+	this->_sock = 0; // * utile? *
+	this->_fdCount = 1;
 }
 
-Server::~Server(){}
+Server::~Server() {}
 
-void	Server::run()
+void Server::run()
 {
-	if (Server::createSocket() == -1)
+	if (Server::createSocket() == -1)                 // Creation du socket du serveur
 		throw SocketFailedException();
-	Server::set_Event(_listenerSock, POLLIN);
+	// Server::setEvent(_listenerSock, POLLIN);         // Ajout du sock serveur a la liste des fds
 	while (true)
 	{
-		// if (Server::polling() == -1);
-			// throw ClientConnectionFailedException();
-		// if (Server::waitClient() == -1)
-			// throw ClientConnectionFailedException();
-		int clientSock = Server::connection();
-		if (clientSock == -1)
+		if (Server::waitConnection() == -1)
 			throw ClientConnectionFailedException();
 	}
 }
@@ -51,19 +44,19 @@ int Server::createSocket()
 	_listenerSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listenerSock == -1)
 		return -1;
-	// if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en non bloquant
-		// return -1;
+	if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en mode non bloquant
+		return -1;
 	std::cout << std::endl << " 1) Socket created" << std::endl;
 
 	/////// Set up des caracteristiques du socket //////
 
-	struct sockaddr_in listenerInfo;  					// sous forme d'une struct
-	memset(&listenerInfo, 0, sizeof(listenerInfo)); 	// initialisation de la struct de 0
-	listenerInfo.sin_family = AF_INET;  				// son type : Internet Protocol V4
-	listenerInfo.sin_port = htons(this->_port);  		// son port d'ecoute: argv[1]
+	struct sockaddr_in listenerInfo;				  	// sous forme d'une struct
+	memset(&listenerInfo, 0, sizeof(listenerInfo));	  	// initialisation de la struct de 0
+	listenerInfo.sin_family = AF_INET;				  	// son type : Internet Protocol V4
+	listenerInfo.sin_port = htons(this->_port);		  	// son port d'ecoute: argv[1]
 	listenerInfo.sin_addr.s_addr = htonl(INADDR_ANY); 	// son Ip : Localhost //
-	if (listenerInfo.sin_addr.s_addr == INADDR_NONE)	// traitement d'erreur
-    	return -1;
+	if (listenerInfo.sin_addr.s_addr == INADDR_NONE)  	// traitement d'erreur
+		return -1;
 
 	//////// Lier le socket aux caract fournies( adresse IP + port) ////////
 
@@ -73,134 +66,178 @@ int Server::createSocket()
 
 	//// Socket en mode ecoute ////
 
-	if(listen(_listenerSock, SOMAXCONN) < 0) // check max listened sockets
+	if (listen(_listenerSock, SOMAXCONN) < 0) /* check max listened sockets */
 		return -1;
-	Server::set_Event(_listenerSock, POLLIN);
+	Server::add_fd_ToList(_listenerSock, POLLIN, 1);
 	return 0;
 }
 
-void	Server::set_Event(int sock, int event) //changer le nom par add user/fd
+void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom par add user/fd */
 {
-	_pfds[_lastFd].fd = sock;
-	_pfds[_lastFd].events = event;
-	std::cout<< "back" << _pfds[_lastFd].fd << std::endl;
-	std::cout<< "back" << _pfds[_lastFd].events << std::endl;
-	_lastFd++;
-}
+	/////   Set up des evenements du fd   /////
 
-int		Server::polling()
-{
-	// static int i;
-
-	int i = 0;
-	// _pfds[i].fd = sock;
-	// _pfds[i].events = event;
-	// std::cout<< "back" << _pfds[0].fd << std::endl;
-	// std::cout<< "back" << _pfds[0].events << std::endl;
-	int res_event = poll(&_pfds[i], _lastFd , -1); // changer le timeout
-	std::cout << res_event << std::endl;
-	std::cout << _pfds[i].revents << std::endl;
-	if (res_event == -1)
-		return -1;
-	if (res_event == 0)
+	// pollfd  pfd;
+	// pfd.fd = sock;
+	// pfd.events = event;
+	if (isServer)
+		_fdCount = 0;
+	std::cout << _fdCount << std::endl;
+	// _pfds.insert(std::pair<int, pollfd>(_fdCount, pfd));
+	_pfds.push_back(pollfd());
+	_pfds.back().fd = sock;
+	_pfds.back().events = event;
+	_pfds.back().revents = 0;
+	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
+	std::cout << "----- FD MAP -----" << std::endl;
+	std::vector<pollfd> :: iterator it;
+   	for(it = _pfds.begin(); it != _pfds.end(); it++)
 	{
-		std::cout << "Time out for socket" << std::endl;
+	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
-	// for (i = 0; i < _lastFd; i++)
+	std::cout << "------------------" << std::endl << std::endl;
+	// if (!isServer)
 	// {
-		// if (_pfds[i].revents == POLLERR|POLLHUP)
-			// std::cout << " Revent socket problem" << std::endl;
-		// if (_pfds[i].events == POLLIN) 							// A socket waiting for read
-		// {
-			// if (_pfds[i].fd == _listenerSock)					// Server socket waiting read
-			// {
-				// if (Server::connection() == -1)
-					// return -1;
-			// }
-			// else
-			// {
-				//
-			// }												//Client socket waiting for read
-//
-			//
-		// }
-
+		//
+		// Users.insert(std::pair<int, User *>(sock, U));
 	// }
-	return 0;
+	_fdCount++;
+	std::cout << _fdCount << std::endl;
 }
 
-int		Server::waitClient()
+int Server::waitConnection()
 {
-	Server::polling();
-
-	return 0;
-}
-
-int		Server::connection()
-{
-	struct sockaddr_in clientInfo;
-	socklen_t clientSize = sizeof(clientInfo);
-	char buf[4096];
-
-	std::cout << std::endl << " 3) Server waiting for client ..." << std::endl;
-	 ///// Accepte une requete de connexion entrante /////
-
-	int clientSock = accept(_listenerSock, (struct sockaddr*)&clientInfo, &clientSize);
-	if (clientSock < 0)
-		return -1;
-	std::cout << std::endl << " 3) Server accepting one connection ..." << std::endl;
-
-	std::string hello = "hello";
-	///// Boucle de lecture des msg recus ///////
-	while (true)
+	int nb_event = 0;
+	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
+	_pfds[0].revents = 0;
+	for (int i = 0; i < _fdCount; i++)
 	{
-		memset (buf, 0, 4096); // size adequate?
-		int byteRcv = recv(clientSock, buf, 4096, 0);
-		if (byteRcv == -1)
-			return -1;
-		else if (byteRcv == 0)
+		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
+	}
+	nb_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
+	std::cout << "Poll result : " << nb_event << std::endl;
+	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
+	if (nb_event == -1)
+	{
+		std::cout << "Poll failed " << std::endl;
+		return -1;
+	}
+	if (nb_event == 0)
+	{
+		std::cout << "Time out for socket" << std::endl; /* voir retour de ce cas */
+		return -1;
+	}
+
+	/////  Boucle d'attente de connexions entrantes ou existantes   ///////
+	// std::cout << _fdCount << "|" << current_size << std::endl;
+	int currentSize = _fdCount;
+	for (int i = 0; i < currentSize; i++)
+	{
+		// std::cout << _fdCount << "|" << currentSize << std::endl;
+		if (_pfds[i].revents == 0) 								// Ce socket n'a pas fait d'appel
+			continue;
+		if (_pfds[i].revents != POLLIN)
 		{
-			std::cout << "The client disconnected" << std::endl;
+			std::cout << "Error! Revent: " << _pfds[i].revents << " on index " << i << std::endl;
+			return -1;
+		}
+		if (_pfds[i].fd == _listenerSock)
+		{
+			if (Server::newClient() == -1)						// Cas du socket du serveur
+				return -1;
+		}
+		else
+		{
+			if (Server::rcvFromClient(i, _pfds[i].fd) == -1)		// Cas du socket d'un client
+				return -1;
+		}
+	}
+	return 0;
+}
+
+int Server::rcvFromClient(int pos, int fd)
+{
+	std::cout << std::endl << "4) Server receving data ..." << std::endl;
+
+	char buf[4096];								/* size adequate? */
+
+	/////  Reception de toutes les donnees sur le socket client   /////
+
+	memset(buf, 0, 4096);
+	int byteRcv = recv(fd, buf, 4096, 0);							// Reception des strings
+	if (byteRcv == -1)
+		return -1;
+	else if (byteRcv == 0)
+	{
+		std::cout << "5) The client disconnected" << std::endl;
+		_pfds.erase(_pfds.begin() + pos);
+		_fdCount--;
+		return 0;
+	}
+	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+	User *U =  new User(std::string(buf, 0, byteRcv));
+	Users.push_back(U);
+	return 0;
+}
+
+int Server::newClient()
+{
+	int newClient = 0;
+
+	///// Accepte les requetes de connexion entrante /////
+
+	std::cout << std::endl << "4) Server waiting for the client ..." << std::endl;
+	do
+	{
+		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
+		// if (fcntl(newClient, F_SETFL, O_NONBLOCK) < 0) 		// set le socket en mode non bloquant
+			// return -1;
+		std::cout << "Accept() = "<< newClient << std::endl;
+		if (newClient < 0)
+		{
+			if (errno != EWOULDBLOCK)
+				return -1;
+			// std::cout << errno << " - " << strerror(errno) << std::endl;
 			break;
 		}
 		else
 		{
-			// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
-			std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
-			send(clientSock, reponse.c_str(), reponse.size(), 0);
-		//    reponse = ":127.0.0.1 002 redarnet :Your host is server, running version <version>\r\n";
+		// 	// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
+		// 	std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
 		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		//    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
-		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		// 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
-		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-			User  *U =  new  User(hello, clientSock);
-			std::map<int, User *>::iterator it = Users.find(clientSock);
-			if (it == Users.end())
-				Users.insert(std::pair<int, User*>(clientSock, U));
-			std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-			Command cmd(buf, Users, clientSock);
+		// //    reponse = ":127.0.0.1 002 redarnet :Your host is server, running version <version>\r\n";
+		// // 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+		// //    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
+		// // 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+		// // 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
+		// // 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+		// 	User  *U =  new  User(hello, clientSock);
+		// 	std::map<int, User *>::iterator it = Users.find(clientSock);
+		// 	if (it == Users.end())
+		// 		Users.insert(std::pair<int, User*>(clientSock, U));
+		// 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+		// 	Command cmd(buf, Users, clientSock);
+		// }
 		}
-	}
 	// close(clientSock); // a enlever
-
+		std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
+		Server::add_fd_ToList(newClient, POLLIN, 0);
+	} while (newClient != -1); // * condition a revoir * //
 	return 0;
-
 }
 
-void    Server::sendmsg(int clientSock, std::string msg)
+void Server::sendmsg(int newClient, std::string msg)
 {
-	send(clientSock, msg.c_str(), msg.length(), 0); // a revoir pour le non bloquant + flag + erreurs (msg.cstr + 1?)
+	send(newClient, msg.c_str(), msg.length(), 0); // * a revoir pour le non bloquant + flag + erreurs (msg.cstr + 1?) *
 }
 
-int		Server::getPort() const
+int Server::getPort() const
 {
-    return(this->_port);
+	return (this->_port);
 }
 
 std::string Server::getPasswd() const
 {
-    return(this->_passwd);
+	return (this->_passwd);
 }
 
 bool Server::hasPasswd() const
@@ -210,13 +247,13 @@ bool Server::hasPasswd() const
 
 bool Server::valid_args(std::string input_port, std::string input_passwd)
 {
-	(void)input_passwd; // a surement enlever
-	char* port_str = const_cast<char*>(input_port.c_str());
+	(void)input_passwd; // * a surement enlever *
+	char *port_str = const_cast<char *>(input_port.c_str());
 
 	if (input_port.length() == 4 && isdigit(port_str[0]))
 	{
 		int port = atoi(input_port.c_str());
-		if (port < 6665 || port > 6669) // c'est ok?
+		if (port < 6665 || port > 6669) // * c'est ok? *
 			return false;
 		return true;
 	}
@@ -224,17 +261,17 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 	return false;
 }
 
-const char* Server::NotValidArgsException::what() const throw()
+const char *Server::NotValidArgsException::what() const throw()
 {
-  return "Argument aren't valid";
+	return "Argument aren't valid";
 }
 
-const char* Server::SocketFailedException::what() const throw()
+const char *Server::SocketFailedException::what() const throw()
 {
-  return "Socket Failed";
+	return "Socket Failed";
 }
 
-const char* Server::ClientConnectionFailedException::what() const throw()
+const char *Server::ClientConnectionFailedException::what() const throw()
 {
-  return "Client connection Failed";
+	return "Client connection Failed";
 }
