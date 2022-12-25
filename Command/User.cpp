@@ -7,17 +7,11 @@
 	// return ;
 // }
 
-<<<<<<< HEAD
 User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
 	_mode = 2;
 	_nickname = "";
 	_channel = "";
-=======
-User::User (std::string command) : _cmd(command)
-{
-	std::cout << "Command: " << this->_cmd << std::endl;
->>>>>>> master
 }
 
 User::User(User const & cpy){

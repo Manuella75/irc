@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 21:51:17 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/23 22:21:59 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,8 +174,18 @@ int Server::rcvFromClient(int pos, int fd)
 		return 0;
 	}
 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	User *U =  new User(std::string(buf, 0, byteRcv));
-	Users.push_back(U);
+	// User *U =  new User("hello", byteRcv);
+	// Users.push_back(U);
+			// send(clientSock, reponse.c_str(), reponse.size(), 0);
+	User  *U =  new  User("hello", fd);
+	std::map<int, User *>::iterator it = Users.find(byteRcv);
+	if (it == Users.end())
+		Users.insert(std::pair<int, User*>(byteRcv, U));
+	std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
+	//  reponse = ":127.0.0.1 002 redarnet :Your host is server, running version <version>\r\n";
+	send(fd, reponse.c_str(), reponse.size(), 0);
+	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+	Command cmd(buf, Users ,byteRcv);
 	return 0;
 }
 
@@ -199,28 +209,14 @@ int Server::newClient()
 			// std::cout << errno << " - " << strerror(errno) << std::endl;
 			break;
 		}
-		else
-		{
-		// 	// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
-		// 	std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
+			// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
+		//    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
 		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		// //    reponse = ":127.0.0.1 002 redarnet :Your host is server, running version <version>\r\n";
-		// // 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		// //    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
-		// // 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		// // 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
-		// // 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		// 	User  *U =  new  User(hello, clientSock);
-		// 	std::map<int, User *>::iterator it = Users.find(clientSock);
-		// 	if (it == Users.end())
-		// 		Users.insert(std::pair<int, User*>(clientSock, U));
-		// 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-		// 	Command cmd(buf, Users, clientSock);
-		// }
-		}
+		// 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
+		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
 	// close(clientSock); // a enlever
-		std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
-		Server::add_fd_ToList(newClient, POLLIN, 0);
+	std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
+	Server::add_fd_ToList(newClient, POLLIN, 0);
 	} while (newClient != -1); // * condition a revoir * //
 	return 0;
 }
