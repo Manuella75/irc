@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 18:17:50 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/23 22:14:48 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@
 #include <vector>
 #include <poll.h>
 #include "../Command/Command.hpp"
+#include <utility>
 #include "../Command/User.hpp"
 
 // class Command;
@@ -54,7 +55,7 @@ private:
     std::vector<pollfd> _pfds;
     
     // Class //
-    std::vector<User *> Users;
+    std::map<int, User *> Users;
     // Create a socket //
     int createSocket();
     
