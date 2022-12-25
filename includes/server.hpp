@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:05:38 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/25 20:22:44 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,14 @@
 #include <vector>
 #include <poll.h>
 #include "../Command/Command.hpp"
+#include <utility>
 #include "../Command/User.hpp"
+#include "../Command/Channel.hpp"
 
 // class Command;
 // class User;
 
-
+class Channel;
 class Server
 {
 
@@ -55,6 +57,7 @@ private:
 
     // Class //
     std::map<int , User *> Users;
+	std::map<std::string, Channel *> Chan;
     // Create a socket //
     int createSocket();
 

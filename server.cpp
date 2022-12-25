@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:21:59 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/25 20:12:36 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,11 +95,16 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
 	std::cout << "------------------" << std::endl << std::endl;
-	// if (!isServer)
-	// {
-		//
-		// Users.insert(std::pair<int, User *>(sock, U));
-	// }
+	if (!isServer)
+	{
+		User  *U =  new  User("hello", sock);
+		// std::map<int, User *>::iterator it = Users.find(sock);
+		// if (it == Users.end())
+		Users.insert(std::pair<int, User *>(sock, U));
+		std::cout << " socket = " << sock << std::endl;
+		std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
+		send(sock, reponse.c_str(), reponse.size(), 0);
+	}
 	_fdCount++;
 	std::cout << _fdCount << std::endl;
 }
@@ -174,18 +179,10 @@ int Server::rcvFromClient(int pos, int fd)
 		return 0;
 	}
 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	// User *U =  new User("hello", byteRcv);
-	// Users.push_back(U);
-			// send(clientSock, reponse.c_str(), reponse.size(), 0);
-	User  *U =  new  User("hello", fd);
-	std::map<int, User *>::iterator it = Users.find(byteRcv);
-	if (it == Users.end())
-		Users.insert(std::pair<int, User*>(byteRcv, U));
-	std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
-	//  reponse = ":127.0.0.1 002 redarnet :Your host is server, running version <version>\r\n";
-	send(fd, reponse.c_str(), reponse.size(), 0);
-	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	Command cmd(buf, Users ,byteRcv);
+	Command cmd(buf, Users, fd, Chan);
+	Users =  cmd.set_Users();
+	Chan =  cmd.set_Chan();
+	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
 	return 0;
 }
 

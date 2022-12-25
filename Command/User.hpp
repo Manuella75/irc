@@ -9,12 +9,11 @@ class	User
 {
 	private :
 	std::string	_nickname;
-	// std::string	_UserName;
-	// std::string	_UserPassword;
 	std::string	_UserHosts;
 	int _mode;
 	int _socket;
 	std::string _channel;
+	std::string _cmd;
 
 	public :
 		std::string  username;
@@ -22,14 +21,17 @@ class	User
 		/* Constructor */
 		User(std::string host, int socket);
 		User(User const & cpy);
+		User(User  * cpy);
 		User &operator=(User const & rhs);
 		std::string const & getUserHost() const;
-		std::string			getUserNick();
-		int					getUserMode();
+		std::string		const	getUserNick() const;
+		int					getUserMode() const ;
 		void				setUserMode(int mode);
+		void				setUserNick(std::string Nick);
 		void				setUserChannel(std::string chann);
-		std::string			getUserChannel();
-		int					getUserSocket();
+		void	setCmd(std::string command);
+		std::string			const getUserChannel() const;
+		int					getUserSocket() const;
 		/* Destructor */
 		~User(void);
 };

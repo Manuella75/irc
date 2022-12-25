@@ -1,6 +1,31 @@
 #include "Command.hpp"
+std::vector<std::string> split_splace1(std::vector<std::string>& v) {
+  std::vector<std::string>::iterator it;
+  for (it = v.begin(); it != v.end(); ++it) {
+	std::string &str = *it;
+		size_t pos = str.find(" ");
+        // Enlever tous les espaces de la chaîne
+        while (pos != std::string::npos) {
+            str.erase(pos, 1);
+            pos = str.find(" ");
+        }
+        // // Trouver l'index des retours à la ligne dans la chaîne
+        // pos = str.find("\n");
+        // // Enlever tous les retours à la ligne de la chaîne
+        // while (pos != std::string::npos) {
+        //     str.erase(pos, 1);
+        //     pos = str.find("\n");
+        // }
+ 	 }
+	 return v;
+}
+void sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
+  // Construisez le message de confirmation en suivant le format du protocole IRC
+  std::string message = ": 001 " + Username + " " + confirmationMessage + "\r\n";
 
-
+  // Envoyez le message au client en utilisant la fonction send()
+  send(clientSocket, message.c_str(), message.length(), 0);
+}
 int	Command::find_User_string(std::string target)
 {
 	std::map<int, User *>::iterator it = Users.begin();
@@ -19,52 +44,62 @@ int	Command::find_User_string(std::string target)
 // 437: ERR_UNAVAILRESOURCE: Nick/channel is temporarily unavailable
 // 482: ERR_CHANOPRIVSNEEDED: You're not channel operator
 
-int	Command::nick(User  U)
+int	Command::nick(User *U)
 {
+	std::cout << "COMMAND NICK" << std::endl;
 	// Vérifie qu'il y a bien un argument
 	if (arguments.empty()) {
 		reply(431);
-	return -1;
+		return -1;
 	}
+	// verifie si le user est deja utilise
 	std::map<int, User *>::const_iterator it;
   	for (it = Users.begin(); it != Users.end(); ++it)
 	{
+		std::cout << "USER = " << it->second->getUserNick();
 		if (arguments[0] == it->second->getUserNick())
+		{
 			reply(433);
-		return (-1);
+			return (-1);
+		}
 	}
-	U.getUserNick() = arguments[1];
-	return (0);
+	U->setUserNick(arguments[0]);
+	std::cout << "New Nick is" << U->getUserNick() << std::endl;
+	sendConfirmationMessage(U->getUserSocket(), "new NICK", U->getUserNick());
+	// Users.insert(std::pair<int, User *>(U.getUserSocket(), U));
+	return 0;
 }
 
 //USER <username> <mode> <unused> <realname>
 /// ?USER <username> <hostname> <realname>
-int	Command::user(User  U)
+int	Command::user(User  *U)
 {
+	std::cout << "COMMAND USER" << std::endl;
 	// error 461
 	if (arguments.empty())
 	{
 		reply(461);
 		return (-1);
 	}
-	if (U.username.size() != 0)
+	if (U->username.size() != 0)
 	{
 		reply(462);
 		return (-1);
 	}
-	U.username = arguments[0];
-	U.setUserMode(atoi(arguments[1].c_str()));
-	U.realname = arguments[2];
+	U->username = arguments[0];
+	U->setUserMode(atoi(arguments[1].c_str()));
+	U->realname = arguments[2];
 	return (1);
 }
 
-int	Command::whois(User U)
+int	Command::whois(User *U)
 {
+	std::cout << "COMMAND WHHOIS" << std::endl;
 	// a voir pour l envoie au client
-	std::cout << U.getUserNick() << std::endl;
-	 std::string reponse = ":localhost 311 " + U.username +
+	std::cout << U->getUserNick() << std::endl;
+	 std::string reponse = ":localhost 311 " + U->username +
 	 " utilisateur utilisateur * :Nom réel\r\n";
-	send(U.getUserSocket(), reponse.c_str(), reponse.size(), 0);
+	send(U->getUserSocket(), reponse.c_str(), reponse.size(), 0);
 	return (0);
 }
 
@@ -74,8 +109,14 @@ int	Command::whois(User U)
 // indiquant qu'il est déjà membre du canal cible.
 // note si le User est deja dans un channel ? > mode = 2
 
-int Command::join(User U)
+int Command::join(User *U)
 {
+	// size_t pos = arguments[0].find("\n");
+    // while (pos != std::string::npos) {
+    // 	arguments[0].erase(pos, 1);
+    //    pos = arguments[0].find("\n");
+    // }
+	std::cout << "COMMAND JOIN" << std::endl;
 	if (arguments.empty())
 		return -1;
 	// si le channel n existe pas > on le cree
@@ -87,20 +128,21 @@ int Command::join(User U)
 		return (0);
 	}
 	// si le User est deja dans le channel
-	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U.getUserSocket());
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
 	if (itUser != it->second->getUsers().end())
 		return -1;
 	//on rajoute le User dans le Channel
-	U.setUserMode(1);
-	U.setUserChannel(arguments[0]);
+	U->setUserMode(1);
+	U->setUserChannel(arguments[0]);
 	User  *Us =  new  User(U);
-	it->second->getUsers().insert(std::pair<int, User *>(U.getUserSocket(), Us));
+	it->second->getUsers().insert(std::pair<int, User *>(U->getUserSocket(), Us));
 	return (0);
 }
 
 //permet de quitter un chanell
-int Command::part(User U)
+int Command::part(User *U)
 {
+	std::cout << "COMMAND PART" << std::endl;
 	if (arguments.empty())
 		return -1;
 	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
@@ -108,12 +150,12 @@ int Command::part(User U)
 	if (it == Chan.end())
 		return -1;
 	// on trouve le User et on le delete
-	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U.getUserSocket());
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
 	if (itUser != it->second->getUsers().end())
 		delete itUser->second;
-	it->second->getUsers().erase(U.getUserSocket());
-	U.setUserMode(2);
-	U.setUserChannel("");
+	it->second->getUsers().erase(U->getUserSocket());
+	U->setUserMode(2);
+	U->setUserChannel("");
 	// si plus de Users delete le channel
 	if (it->second->getUsers().size() == 0)
 	{
@@ -125,8 +167,9 @@ int Command::part(User U)
 
 //permet de donner le mode ope a un user normal
 // <target> <mode>
-int Command::mode(User U)
+int Command::mode(User *U)
 {
+	std::cout << "COMMAND MODE" << std::endl;
 	int Use;
 
 	// si le mode est pas ope ca sert a rien
@@ -135,10 +178,10 @@ int Command::mode(User U)
 	if (arguments.empty() && arguments.size() != 2)
 		return -1;
 		// si le user n est pas un ope ou n est pas dans un channel
-	if (U.getUserMode() != 1)
+	if (U->getUserMode() != 1)
 		return -1;
 	// on regarde si les 2 users sont dans le meme channel
-	std::map<std::string, Channel *>::iterator it = Chan.find(U.getUserChannel());
+	std::map<std::string, Channel *>::iterator it = Chan.find(U->getUserChannel());
 	//on cherche le User et on le met ope
 	Use = find_User_string(arguments[1]);
 	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(Use);
@@ -150,43 +193,97 @@ int Command::mode(User U)
 	return -1;
 }
 
+int Command::ping(User *U)
+{
+	std::cout << "COMMAND PING" << std::endl;
+	sendConfirmationMessage(U->getUserSocket(), "PONG", U->getUserNick());
+	return 0;
+}
+
+int Command::privmsg(User *U)
+{
+	//si le user est dans aucun channel
+	std::cout << "COMMAND PRIVMSG" << std::endl;
+	// if (U->getUserMode() == 2)
+	// 	return -1;
+	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	std::cout << " chan = " << it->first << std::endl;
+	std::cout << " chan = " << Chan.begin()->first<<  "|"  << std::endl;
+	std::cout << " argu = " << arguments[0]  << "|"<< std::endl;
+
+	if (it == Chan.end())
+		return (-1);
+	// envoie un msg a tous les user dans le channel
+	std::map<int, User *>::iterator itUser = it->second->getUsers().begin();
+	std::cout << "R :"  << std::endl;
+	for (;itUser != it->second->getUsers().end(); itUser++)
+	{
+		std::string message = ":"+ itUser->second->getUserNick() +" PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
+		std::cout << "Message = " << message << std::endl;
+		if (itUser->second->getUserSocket() != U->getUserSocket())
+			send(itUser->second->getUserSocket(), message.c_str(), message.length(), 0);
+	}
+	std::cout << "P :"  << std::endl;
+
+	return 0;
+}
+
+std::map<int, User *>  Command::set_Users()
+{
+	return this->Users;
+}
+
+std::map<std::string, Channel *>  Command::set_Chan()
+{
+	return this->Chan;
+}
+
 int	Command::ft_exec_cmd(int clientSock)
 {
-	std::string command[5] = {"NICK", "USER", "WHOIS", "JOIN", "PART" "MODE"};
+	std::string command[8] = {"NICK", "USER", "WHOIS", "JOIN", "PART" , "MODE", "PING", "PRIVMSG"};
 
 	std::map<int, User *>::iterator it = Users.find(clientSock);
-	int	(Command::*functptr[])(User) = {&Command::nick, &Command::user, &Command::whois, &Command::join, &Command::part, &Command::mode};
+	int	(Command::*functptr[])(User*) = {&Command::nick, &Command::user, &Command::whois, &Command::join, &Command::part, &Command::mode,&Command::ping, &Command::privmsg};
 
 	int	ret;
-	for (int i = 0; i < 5; i++)
+	std::cout << "Cmd : " << _command << std::endl; // A supp
+	for (int i = 0; i < 8; i++)
 	{
 		if (command[i] == _command)
 		{
-			ret = (this->*functptr[i])(*it->second);
+			ret = (this->*functptr[i ])(it->second);
+			std::cout << "Retour cmd = " << ret << std::endl;
 			return (ret); // verifier code d'erreurs dans la doc IRC
 		}
 	}
+	std::map<int, User *>::const_iterator ite;
+  	for (ite = Users.begin(); ite != Users.end(); ++ite)
+		std::cout << "USER = " << ite->second->getUserNick();
+
+
 	return 0;
 }
 
 /* Constructor */
 
-Command::Command(std::string msg, std::map<int, User*> Us, int clientSock) : _BrutMsg(msg)
+Command::Command(std::string msg, std::map<int, User*> Us, int clientSock, std::map<std::string, Channel *> Chann) : _BrutMsg(msg)
 {
-	 std::string reponse = ":sender PRIVMSG redarnet ee\r\n";
-	send(clientSock, reponse.c_str(), reponse.size(), 0);
 	std::istringstream ss(msg);
 	Users = Us;
+	Chan = Chann;
 	std::string token;
 	while (std::getline(ss, token, ' '))
 	{
 		arguments.push_back(token);
 	}
+	arguments = split_splace1(arguments);
 	_command = arguments[0];
+
+
 	arguments.erase(arguments.begin());
 	printVector(arguments);
-	std::cout << "Constructeur called for : " << this->_BrutMsg << std::endl; // A supp
 	ft_exec_cmd(clientSock); // code retour ??
+	arguments.clear();
 	return ;
 }
 

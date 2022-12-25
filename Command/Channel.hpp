@@ -15,10 +15,14 @@ class Channel
 		std::map<int, User *> _Users; // channel users
 	public :
 	 	Channel(std::string const  name, User U);
+		Channel(Channel const &cpy);
+		Channel(Channel * cpy);
 		~Channel();
+		Channel & operator=(Channel const & rhs);
 		std::string const & getName() const;
 		std::string const & getTopic() const;
+		std::map<int, User *> const  & getUsers() const;
 		std::map<int, User *>  & getUsers();
-		int  getMode() const;
+
 };
 #endif

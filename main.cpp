@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 21:51:48 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/25 15:25:48 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,4 +44,8 @@ int	main (int argc, char **argv)
 	-hamdle error msg
 	-hamdle error msg
 	-check pb fuser
+	-ping pong
+	-timeout-
+	-mode
+	-
  */

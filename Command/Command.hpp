@@ -31,15 +31,19 @@ class	Command
 
 	public :
 		/* Constructor */
-		Command(std::string cmd, std::map<int, User*> Users, int clientSock);
+		Command(std::string cmd, std::map<int, User*> Users, int clientSock, std::map<std::string, Channel *> Chan);
 		int	ft_exec_cmd(int clientSock);
 		int	find_User_string(std::string target);
-		int	nick(User U);
-		int	user(User U);
-		int	whois(User U);
-		int join(User U);
-		int part(User U);
-		int mode(User U);
+		std::map<int, User *> set_Users();
+		std::map<std::string, Channel *> set_Chan();
+		int	nick(User *U);
+		int	user(User *U);
+		int	whois(User *U);
+		int join(User *U);
+		int part(User *U);
+		int ping(User *U);
+		int mode(User *U);
+		int privmsg(User *U);
 		/* Destructor */
 		~Command(void);
 };
