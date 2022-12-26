@@ -145,7 +145,8 @@ int Command::part(User *U)
 	std::cout << "COMMAND PART" << std::endl;
 	if (arguments.empty())
 		return -1;
-	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	// std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	std::map<std::string, Channel *>::iterator it = Chan.begin();
 	//si le channel exist pas
 	if (it == Chan.end())
 		return -1;
@@ -155,6 +156,10 @@ int Command::part(User *U)
 		delete itUser->second;
 	it->second->getUsers().erase(U->getUserSocket());
 	U->setUserMode(2);
+	// std::string message = "PART" + U->getUserChannel() + "\r\n";
+	std::string message = ":" + U->getUserNick() + "PART #le\r\n";
+	std::cout << "message = " << message << std::endl;
+	send(U->getUserSocket(), message.c_str(), message.length(), 0);
 	U->setUserChannel("");
 	// si plus de Users delete le channel
 	if (it->second->getUsers().size() == 0)
@@ -200,16 +205,41 @@ int Command::ping(User *U)
 	return 0;
 }
 
+int Command::privmsg_user(User *U)
+{
+	(void)U;
+	std::cout << "ici" << std::endl;
+	if (arguments.empty() && arguments.size() < 1)
+		return -2;
+	// int user = find_User_string(arguments[0]);
+	std::map<int, User *>::const_iterator ite;
+    for (ite = Users.begin(); ite != Users.end(); ++ite)
+    {
+        std::cout << ite->first << ": " << ite->second << std::endl;
+    }
+	// std::map<int, User *>::iterator it = Users.find(user);
+	// if (it == Users.end())
+	// 	return -3;
+	// std::string message = ":"+ U->getUserNick() +" PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
+	std::string message = ": theo PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
+	std::cout << "Message = " << message << std::endl;
+	// send(it->second->getUserSocket(), message.c_str(), message.length(), 0);
+	send(4, message.c_str(), message.length(), 0);
+
+	return 0;
+}
 int Command::privmsg(User *U)
 {
 	//si le user est dans aucun channel
 	std::cout << "COMMAND PRIVMSG" << std::endl;
+	if (arguments[0][0] != '#')
+		return (privmsg_user(U));
 	// if (U->getUserMode() == 2)
 	// 	return -1;
 	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
-	std::cout << " chan = " << it->first << std::endl;
-	std::cout << " chan = " << Chan.begin()->first<<  "|"  << std::endl;
-	std::cout << " argu = " << arguments[0]  << "|"<< std::endl;
+	// std::cout << " chan = " << it->first << std::endl;
+	// std::cout << " chan = " << Chan.begin()->first<<  "|"  << std::endl;
+	// std::cout << " argu = " << arguments[0]  << "|"<< std::endl;
 
 	if (it == Chan.end())
 		return (-1);

@@ -4,6 +4,7 @@ Channel::Channel(std::string  name, User U) : _name(name)
 {
 	User  *Us =  new  User(U);
 	U.setUserMode(1);
+	U.setUserChannel(name);
 	_Users.insert(std::pair<int , User *>(U.getUserSocket(), Us));
 
 }
