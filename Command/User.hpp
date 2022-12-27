@@ -8,6 +8,7 @@ class	User
 {
 	private :
 
+	int			_fd;
 	std::string	_UserNick;
 	std::string _cmd;
 	// std::string	_UserName;
@@ -17,7 +18,7 @@ class	User
 	public :
 
 	/* Constructor */
-	User(std::string cmd);
+	User();
 	User(User const & cpy);
 	User &operator=(User const & rhs);
 	std::string const & getUserHost() const;
@@ -28,6 +29,7 @@ class	User
 
 	/* Member functions */
 	void setCmd(std::string command);
+	void setBuf(std::string buffer);
 };
 
 #endif

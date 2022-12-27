@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:35:04 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/27 21:43:07 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ int	main (int argc, char **argv)
 	-hamdle error msg	
 	-check pb fuser
 	-ping pong
-	-timeout-
+	-timeout
 	-mode
-	-
+	-maxbacklog
+	-max users
  */

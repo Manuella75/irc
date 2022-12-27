@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:14:48 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/27 22:16:28 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 #include <utility>
 #include "../Command/User.hpp"
 
+#define BUFFERSIZE 512
 // class Command;
 // class User;
 
@@ -50,7 +51,7 @@ private:
     std::string         _passwd;
     int                 _listenerSock;
     int                 _sock;    // 
-    int                 _fdCount; // a changer par map des Users
+    // int                 _fdCount; // a changer par map des Users
     // std::map<int,pollfd> _pfds;
     std::vector<pollfd> _pfds;
     
@@ -60,7 +61,7 @@ private:
     int createSocket();
     
     // Set up fd //
-    void add_fd_ToList(int sock, int event, int isServer); // add a fd to the map
+    void add_fd(int sock, int event, int isServer); // add a fd to the map
 
     // Wait for a connection //
     int waitConnection();
@@ -86,6 +87,7 @@ public:
     // Get functions //
     int         getPort() const;
     std::string getPasswd() const;
+    User *      getUser(int fd) const;
 
     // Check functions //
     bool valid_args(std::string input_port, std::string input_passwd);
