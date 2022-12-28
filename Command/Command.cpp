@@ -10,18 +10,18 @@ std::vector<std::string> split_splace1(std::vector<std::string>& v) {
             pos = str.find(" ");
         }
         // // Trouver l'index des retours à la ligne dans la chaîne
-        // pos = str.find("\n");
-        // // Enlever tous les retours à la ligne de la chaîne
-        // while (pos != std::string::npos) {
-        //     str.erase(pos, 1);
-        //     pos = str.find("\n");
-        // }
+        pos = str.find("\n");
+        // Enlever tous les retours à la ligne de la chaîne
+        while (pos != std::string::npos) {
+            str.erase(pos, 1);
+            pos = str.find("\n");
+        }
  	 }
 	 return v;
 }
 void sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
   // Construisez le message de confirmation en suivant le format du protocole IRC
-  std::string message = ": 001 " + Username + " " + confirmationMessage + "\r\n";
+  std::string message = ": 001 "  + Username + " " + confirmationMessage + "\r\n";
 
   // Envoyez le message au client en utilisant la fonction send()
   send(clientSocket, message.c_str(), message.length(), 0);
@@ -31,8 +31,13 @@ int	Command::find_User_string(std::string target)
 	std::map<int, User *>::iterator it = Users.begin();
 	for (; it != Users.end(); it++)
 	{
+		std::cout << "user === " <<it->second->getUserNick() << "|" <<std::endl;
+		std::cout << "target=== " << target << "|" << std::endl;
 		if (it->second->getUserNick() == target)
+		{
+		std::cout << "use |" <<std::endl;
 			return it->first;
+		}
 	}
 	return -1;
 }
@@ -56,16 +61,18 @@ int	Command::nick(User *U)
 	std::map<int, User *>::const_iterator it;
   	for (it = Users.begin(); it != Users.end(); ++it)
 	{
-		std::cout << "USER = " << it->second->getUserNick();
+		// std::cout << "USER = " << it->second->getUserNick() << std::endl;
 		if (arguments[0] == it->second->getUserNick())
 		{
-			reply(433);
-			return (-1);
+			U->setUserNick( "Theo");
+			std::cout << "New Nick is " << U->getUserNick() << std::endl;
+			sendConfirmationMessage(U->getUserSocket(), "new NICK", U->getUserNick() );
+			return (0);
 		}
 	}
 	U->setUserNick(arguments[0]);
-	std::cout << "New Nick is" << U->getUserNick() << std::endl;
-	sendConfirmationMessage(U->getUserSocket(), "new NICK", U->getUserNick());
+	std::cout << "New Nick is " << U->getUserNick() << std::endl;
+	sendConfirmationMessage(U->getUserSocket(), "new NICK", U->getUserNick() );
 	// Users.insert(std::pair<int, User *>(U.getUserSocket(), U));
 	return 0;
 }
@@ -97,7 +104,7 @@ int	Command::whois(User *U)
 	std::cout << "COMMAND WHHOIS" << std::endl;
 	// a voir pour l envoie au client
 	std::cout << U->getUserNick() << std::endl;
-	 std::string reponse = ":localhost 311 " + U->username +
+	 std::string reponse = ":" + U->username +
 	 " utilisateur utilisateur * :Nom réel\r\n";
 	send(U->getUserSocket(), reponse.c_str(), reponse.size(), 0);
 	return (0);
@@ -208,24 +215,21 @@ int Command::ping(User *U)
 int Command::privmsg_user(User *U)
 {
 	(void)U;
-	std::cout << "ici" << std::endl;
 	if (arguments.empty() && arguments.size() < 1)
 		return -2;
-	// int user = find_User_string(arguments[0]);
+	int user = find_User_string(arguments[0]);
 	std::map<int, User *>::const_iterator ite;
     for (ite = Users.begin(); ite != Users.end(); ++ite)
     {
-        std::cout << ite->first << ": " << ite->second << std::endl;
+        std::cout << ite->first << ": " << ite->second->getUserNick() << std::endl;
     }
-	// std::map<int, User *>::iterator it = Users.find(user);
-	// if (it == Users.end())
-	// 	return -3;
-	// std::string message = ":"+ U->getUserNick() +" PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
-	std::string message = ": theo PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
+	std::map<int, User *>::iterator it = Users.find(user);
+	if (it == Users.end())
+		return -3;
+	std::string message = ":"+ U->getUserNick() +" PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
+	// std::string message = ":  PRIVMSG " + arguments[0] + " :" + arguments[1] + "\r\n";
 	std::cout << "Message = " << message << std::endl;
-	// send(it->second->getUserSocket(), message.c_str(), message.length(), 0);
-	send(4, message.c_str(), message.length(), 0);
-
+	send(it->second->getUserSocket(), message.c_str(), message.length(), 0);
 	return 0;
 }
 int Command::privmsg(User *U)
@@ -288,7 +292,7 @@ int	Command::ft_exec_cmd(int clientSock)
 	}
 	std::map<int, User *>::const_iterator ite;
   	for (ite = Users.begin(); ite != Users.end(); ++ite)
-		std::cout << "USER = " << ite->second->getUserNick();
+		std::cout << "USERs in serv = " << ite->second->getUserNick() << std::endl;
 
 
 	return 0;
@@ -302,14 +306,13 @@ Command::Command(std::string msg, std::map<int, User*> Us, int clientSock, std::
 	Users = Us;
 	Chan = Chann;
 	std::string token;
+
 	while (std::getline(ss, token, ' '))
 	{
 		arguments.push_back(token);
 	}
 	arguments = split_splace1(arguments);
 	_command = arguments[0];
-
-
 	arguments.erase(arguments.begin());
 	printVector(arguments);
 	ft_exec_cmd(clientSock); // code retour ??

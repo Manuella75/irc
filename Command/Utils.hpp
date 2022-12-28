@@ -7,10 +7,10 @@
 template <typename T>
 void printVector(const std::vector<T>& v) {
   typename std::vector<T>::const_iterator it;
+  std::cout << "Vecteur = " << std::endl;
   for (it = v.begin(); it != v.end(); ++it) {
-    std::cout << *it << " ";
+    std::cout << *it << "|" << std::endl;
   }
-  std::cout << std::endl;
 }
 
 

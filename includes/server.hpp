@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/25 20:22:44 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/28 03:07:20 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 #include <poll.h>
 #include "../Command/Command.hpp"
 #include <utility>
+#include <iostream>
 #include "../Command/User.hpp"
 #include "../Command/Channel.hpp"
 
@@ -92,6 +93,7 @@ public:
     // Check functions //
     bool valid_args(std::string input_port, std::string input_passwd);
     bool hasPasswd() const;
+	void	setUserInfo(std::string buff, int fd);
 
     // Exceptions//
     class NotValidArgsException : public std::exception

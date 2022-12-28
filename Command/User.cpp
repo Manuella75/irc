@@ -10,7 +10,7 @@
 User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
 	_mode = 2;
-	_nickname = "yo ";
+	_nickname = "yo";
 	_channel = "";
 }
 
@@ -36,7 +36,6 @@ void User::setCmd(std::string command)
 {
 	this->_cmd = command;
 }
-
 
 std::string const & User::getUserHost() const
 {

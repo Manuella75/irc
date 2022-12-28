@@ -6,12 +6,11 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/25 20:12:36 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/28 04:01:36 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
-
 Server::Server(std::string input_port, std::string input_passwd)
 {
 	if (valid_args(input_port, input_passwd) == false)
@@ -159,6 +158,27 @@ int Server::waitConnection()
 	return 0;
 }
 
+void	Server::setUserInfo(std::string buff, int fd)
+{
+	buff.erase(buff.size() -1);
+	std::vector<std::string> vec;
+	std::istringstream ss(buff);
+    std::string string;
+
+    while (std::getline(ss, string, '\n'))
+    {
+        vec.push_back(string );
+    }
+	std::vector<std::string>::iterator it = vec.begin();
+	for (; it != vec.end();it++)
+	{
+		Command cmd(*it, Users, fd, Chan);
+		Users =  cmd.set_Users();
+		Chan =  cmd.set_Chan();
+	}
+	vec.clear();
+}
+
 int Server::rcvFromClient(int pos, int fd)
 {
 	std::cout << std::endl << "4) Server receving data ..." << std::endl;
@@ -169,6 +189,7 @@ int Server::rcvFromClient(int pos, int fd)
 
 	memset(buf, 0, 4096);
 	int byteRcv = recv(fd, buf, 4096, 0);							// Reception des strings
+
 	if (byteRcv == -1)
 		return -1;
 	else if (byteRcv == 0)
@@ -179,9 +200,32 @@ int Server::rcvFromClient(int pos, int fd)
 		return 0;
 	}
 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	Command cmd(buf, Users, fd, Chan);
-	Users =  cmd.set_Users();
-	Chan =  cmd.set_Chan();
+	std::string str = buf;
+	size_t po = str.find("\r");
+        while (po != std::string::npos) {
+            str.erase(po, 1);
+            po = str.find("\r");
+        }
+		// std::string str2;
+		// for (size_t i= 0; i< str.length(); i++)
+		// {
+		// 	if (str[i] != '\n')
+		// 		str2 += str[i];
+		// 	else
+		// 		str2 += '|';
+		// }
+		// for (size_t i = 0; i < strlen(buf); i++)
+		// 	std::cout << buf[i] << "|" ;
+
+	std::map<int, User *>::iterator it = Users.find(fd);
+	if (it->second->getUserNick() == "yo")
+		setUserInfo(str, fd);
+	else
+	{
+		Command cmd(str, Users, fd, Chan);
+		Users =  cmd.set_Users();
+		Chan =  cmd.set_Chan();
+	}
 	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
 	return 0;
 }
