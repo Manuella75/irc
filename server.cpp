@@ -6,11 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2022/12/29 18:16:30 by mettien          ###   ########.fr       */
-=======
-/*   Updated: 2022/12/27 22:32:23 by mettien          ###   ########.fr       */
->>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
+/*   Updated: 2022/12/29 22:27:07 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,12 +95,8 @@ void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add
 	std::cout << std::endl << "New Client on socket #" << sock << "." << std::endl;
 	std::cout << "-----------------" << std::endl;
 	std::vector<pollfd> :: iterator it;
-<<<<<<< HEAD
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
 	
-=======
-	for(it = _pfds.begin(); it != _pfds.end(); it++)
->>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
 	{
 	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
@@ -115,21 +107,11 @@ int Server::waitConnection()
 {
 	int nb_event = 0;
 	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
-<<<<<<< HEAD
-
-	_pfds[0].revents = 0;
-	for (int i = 0; i < _fdCount; i++)
-	{
-		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
-	}
-	nb_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
-=======
 	// for (size_t i = 0; i < _pfds.size(); i++)
 	// {
 		// std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
 	// }
 	nb_event = poll(&_pfds[0], _pfds.size(), -1);  /* changer le timeout */
->>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
 	std::cout << "Poll result : " << nb_event << std::endl;
 	if (nb_event == -1)
 	{

@@ -13,7 +13,7 @@ class	User
 	// std::string	_UserName;
 	// std::string	_UserPassword;
 	std::string	_UserHost;
-	bool		_connected;
+	// bool		_connected;
 
 	public :
 
