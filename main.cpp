@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:35:04 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/29 21:46:59 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,5 +46,23 @@ int	main (int argc, char **argv)
 	-ping pong
 	-timeout-
 	-mode
-	-
+	-envoie du welcome juste apres nick et user
+	-user nickname max 9
+
+	Server Operator:
+	-/OPER <userid> <password> (authentification pr etre IRCOPERATOR)
+	-/KILL <nick> [message] (virer qq du serveur,deconnexion)
+	-/ISBANNED <channel> <nickname> (savoir si un user est ban)
+
+	ChanOperator:
+	-/TOPIC #cool Bienvenue sur #COOL =) (change topic du chan)
+	-/KICK <channel> <nick> [message] (virer qq du chan)
+	-/INVITE <channelname> <nickname> (invite qq sur chan,si mode +i)
+
+	MODE
+		*Channel*
+		- +m(moderated), seuls users +v peuvent parler
+		- +i(invite) , users doit etre inviter
+		- +l, limite le nb de users ds un chan
+		- +
  */

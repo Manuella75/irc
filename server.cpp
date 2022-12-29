@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:37:53 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/29 18:16:30 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 	std::cout << "----- FD MAP -----" << std::endl;
 	std::vector<pollfd> :: iterator it;
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
+	
 	{
 	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
@@ -110,6 +111,7 @@ int Server::waitConnection()
 {
 	int nb_event = 0;
 	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
+
 	_pfds[0].revents = 0;
 	for (int i = 0; i < _fdCount; i++)
 	{
