@@ -1,0 +1,7 @@
+Quel est le nom du premier langage de programmation encore utilisé actuellement ?<|#()#|>FORTRAN
+Que veut dire PHP ?<|#()#|>PHP Hypertext Preprocessor
+Quelle est la propriété CSS pour définir la bordure d'un bloc ?<|#()#|>border
+Quand a été créé le Site du Zéro ?<|#()#|>1999
+Quelle est la Réponse à la Grande Question de la Vie, de l'Univers et du Reste ?<|#()#|>42
+Qui a créé Linux ?<|#()#|>Linus Torvalds
+Qui est à l'initiative du projet de système d'exploitation libre GNU ?<|#()#|>Richard Stallman

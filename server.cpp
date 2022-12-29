@@ -6,12 +6,11 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/29 22:27:07 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/29 22:51:36 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
-
 Server::Server(std::string input_port, std::string input_passwd)
 {
 	if (valid_args(input_port, input_passwd) == false)
@@ -81,7 +80,7 @@ void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add
 	
 	if (!isServer)
 	{
-		User *new_user =  new User();
+		User *new_user =  new User("hello",sock);
 		if (Users.count(sock) > 0)						// check si Users deja existant
 			return;
 		Users.insert(std::pair<int, User *>(sock, new_user));
@@ -135,18 +134,39 @@ int Server::waitConnection()
 			std::cout << "Error! Revent: " << _pfds[i].revents << " on index " << i << std::endl;
 			return -1;
 		}
-		if (_pfds[i].fd == _listenerSock) 			
+		if (_pfds[i].fd == _listenerSock)
 		{
 			if (Server::newClient() == -1)						// Cas du socket du serveur
 				return -1;
 		}
-		else 										
+		else
 		{
 			if (Server::rcvFromClient(i, _pfds[i].fd) == -1)		// Cas du socket d'un client
 				return -1;
 		}
 	}
 	return 0;
+}
+
+void	Server::setUserInfo(std::string buff, int fd)
+{
+	buff.erase(buff.size() -1);
+	std::vector<std::string> vec;
+	std::istringstream ss(buff);
+    std::string string;
+
+    while (std::getline(ss, string, '\n'))
+    {
+        vec.push_back(string );
+    }
+	std::vector<std::string>::iterator it = vec.begin();
+	for (; it != vec.end();it++)
+	{
+		Command cmd(*it, Users, fd, Chan);
+		Users =  cmd.set_Users();
+		Chan =  cmd.set_Chan();
+	}
+	vec.clear();
 }
 
 int Server::rcvFromClient(int pos, int fd)
@@ -170,7 +190,24 @@ int Server::rcvFromClient(int pos, int fd)
 		return 0;
 	}
 	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	Server::getUser(fd)->setBuf(std::string(buf));
+	// Server::getUser(fd)->setBuf(std::string(buf));
+	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+	std::string str = buf;
+	size_t po = str.find("\r");
+        while (po != std::string::npos) {
+            str.erase(po, 1);
+            po = str.find("\r");
+        }
+	std::map<int, User *>::iterator it = Users.find(fd);
+	if (it->second->getUserNick() == "")
+		setUserInfo(str, fd);
+	else
+	{
+		Command cmd(str, Users, fd, Chan);
+		Users =  cmd.set_Users();
+		Chan =  cmd.set_Chan();
+	}
+	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
 	return 0;
 }
 
@@ -179,7 +216,7 @@ int Server::newClient()
 	int newClient = 0;
 
 	///// Accepte les requetes de connexion entrante /////
-	
+
 	std::cout << std::endl << "4) Server waiting for the client ..." << std::endl;
 	do
 	{
@@ -194,8 +231,14 @@ int Server::newClient()
 			// std::cout << errno << " - " << strerror(errno) << std::endl;
 			break;
 		}
-		std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
-		Server::add_fd(newClient, POLLIN, 0);
+			// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
+		//    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
+		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+		// 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
+		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
+	// close(clientSock); // a enlever
+	std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
+	Server::add_fd(newClient, POLLIN, 0);
 	} while (newClient != -1); // * condition a revoir * //
 	return 0;
 }

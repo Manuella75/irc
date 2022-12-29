@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/27 22:16:28 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/29 22:42:19 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,50 +34,53 @@
 #include <poll.h>
 #include "../Command/Command.hpp"
 #include <utility>
+#include <iostream>
 #include "../Command/User.hpp"
+#include "../Command/Channel.hpp"
 
 #define BUFFERSIZE 512
 // class Command;
 // class User;
 
-
+class Channel;
 class Server
 {
 
 private:
-    
+
     // Attributes //
     int                 _port;
     std::string         _passwd;
     int                 _listenerSock;
-    int                 _sock;    // 
+    int                 _sock;    //
     // int                 _fdCount; // a changer par map des Users
     // std::map<int,pollfd> _pfds;
     std::vector<pollfd> _pfds;
-    
+
     // Class //
-    std::map<int, User *> Users;
+    std::map<int , User *> Users;
+	std::map<std::string, Channel *> Chan;
     // Create a socket //
     int createSocket();
-    
+
     // Set up fd //
     void add_fd(int sock, int event, int isServer); // add a fd to the map
 
     // Wait for a connection //
     int waitConnection();
-    
+
     // Connection with clients
     int newClient();
 
     // Receive data from Client //
     int rcvFromClient(int pos, int fd);
-    
+
 public:
 
     // Construct/Destruct //
     Server(std::string port, std::string passwd);
     ~Server();
-    
+
     // Send message to client //
     void        sendmsg(int clientSock, std::string msg);
 
@@ -92,6 +95,7 @@ public:
     // Check functions //
     bool valid_args(std::string input_port, std::string input_passwd);
     bool hasPasswd() const;
+	void	setUserInfo(std::string buff, int fd);
 
     // Exceptions//
     class NotValidArgsException : public std::exception
@@ -105,7 +109,7 @@ public:
         public:
             const char* what() const throw();
     };
-    
+
     class ClientConnectionFailedException : public std::exception
     {
         public:

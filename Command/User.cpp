@@ -7,19 +7,28 @@
 	// return ;
 // }
 
-
-User::User () 
+User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
-	
+	_mode = 2;
+	_nickname = "";
+	_channel = "";
 }
 
 User::User(User const & cpy){
 	*this = cpy;
 }
 
+User::User(User * cpy){
+	*this = *cpy;
+}
+
 User & User::operator=(User const & rhs)
 {
-	this->_UserHost = rhs.getUserHost();
+	this->_UserHosts = rhs.getUserHost();
+	this->_nickname = rhs.getUserNick();
+	this->_socket = rhs.getUserSocket();
+	this->_mode = rhs.getUserMode();
+	this->_channel = rhs.getUserChannel();
 	return *this;
 }
 
@@ -28,17 +37,51 @@ void User::setCmd(std::string command)
 	this->_cmd = command;
 }
 
-void User::setBuf(std::string buffer)
-{
-
-	std::cout << "The buffer received [ " << buffer << " ]." << std::endl;
-}
+// void User::setBuf(std::string buffer)
+// {
+// 
+	// std::cout << "The buffer received [ " << buffer << " ]." << std::endl;
+// }
 
 std::string const & User::getUserHost() const
 {
-	return _UserHost;
+	return _UserHosts;
 }
-/* Destructor */
+
+std::string const  User::getUserNick() const
+{
+	return _nickname;
+}
+
+int  User::getUserSocket() const
+{
+	return _socket;
+}
+
+int  User::getUserMode() const
+{
+	return _mode;
+}
+
+void  User::setUserMode(int mode)
+{
+	_mode = mode;
+}
+
+std::string const  User::getUserChannel() const
+{
+	return _channel;
+}
+
+void  User::setUserNick(std::string nick)
+{
+	_nickname = nick;
+}
+
+void  User::setUserChannel(std::string chann)
+{
+	_channel = chann;
+}
 
 User::~User(void)
 {

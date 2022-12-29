@@ -1,0 +1,16 @@
+JOIN : permet à un utilisateur de rejoindre un canal (channel) sur le serveur.
+PART : permet à un utilisateur de quitter un canal sur le serveur.
+PRIVMSG : permet à un utilisateur d'envoyer un message privé à un autre utilisateur ou à un canal.
+NICK : permet à un utilisateur de changer son nom d'utilisateur.
+MODE : permet de changer les paramètres d'un canal ou d'un utilisateur.
+TOPIC : permet de changer le sujet d'un canal.
+INVITE : permet d'inviter un utilisateur à rejoindre un canal privé.
+KICK : permet d'expulser un utilisateur d'un canal.
+WHOIS : permet de récupérer des informations sur un utilisateur, comme son nom d'utilisateur, son adresse IP et son temps de connexion.
+QUIT : permet à un utilisateur de quitter le serveur IRC.
+ping
+user
+
+
+User 3 mode > 0 uti classic > 1 operator > 2 > pas dans un channel 
+join > operator si premier 

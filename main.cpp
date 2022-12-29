@@ -6,13 +6,13 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/29 22:25:15 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/29 22:43:46 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
 
-int	main (int argc, char **argv) 
+int	main (int argc, char **argv)
 {
 	if (argc != 3)
 	{
@@ -41,7 +41,8 @@ int	main (int argc, char **argv)
 	-read all the buffer from client
 	-handle ip v6 ?
 	-handle les dependancies
-	-hamdle error msg	
+	-hamdle error msg
+	-hamdle error msg
 	-check pb fuser
 	-ping pong
 	-timeout

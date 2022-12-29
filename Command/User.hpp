@@ -3,33 +3,39 @@
 
 # include <iostream>
 #include <string>
+#include <map>
+#include <vector>
+#include <sstream>
 
 class	User
 {
 	private :
-
-	std::string	_UserNick;
+	std::string	_nickname;
+	std::string	_UserHosts;
+	int _mode;
+	int _socket;
+	std::string _channel;
 	std::string _cmd;
-	// std::string	_UserName;
-	// std::string	_UserPassword;
-	std::string	_UserHost;
-	// bool		_connected;
 
 	public :
-
-	/* Constructor */
-	User();
-	User(User const & cpy);
-	User &operator=(User const & rhs);
-	std::string const & getUserHost() const;
-	
-	// User(std::string nick, std::string name, std::string password ,std::string host);
-	/* Destructor */
-	~User(void);
-
-	/* Member functions */
-	void setCmd(std::string command);
-	void setBuf(std::string buffer);
+		std::string  username;
+		std::string realname;
+		/* Constructor */
+		User(std::string host, int socket);
+		User(User const & cpy);
+		User(User  * cpy);
+		User &operator=(User const & rhs);
+		std::string const & getUserHost() const;
+		std::string		const	getUserNick() const;
+		int					getUserMode() const ;
+		void				setUserMode(int mode);
+		void				setUserNick(std::string Nick);
+		void				setUserChannel(std::string chann);
+		void	setCmd(std::string command);
+		std::string			const getUserChannel() const;
+		int					getUserSocket() const;
+		/* Destructor */
+		~User(void);
 };
 
 #endif
