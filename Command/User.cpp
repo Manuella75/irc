@@ -9,7 +9,9 @@
 
 
 User::User () 
-{}
+{
+	
+}
 
 User::User(User const & cpy){
 	*this = cpy;

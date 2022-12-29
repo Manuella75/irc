@@ -8,12 +8,12 @@ class	User
 {
 	private :
 
-	int			_fd;
 	std::string	_UserNick;
 	std::string _cmd;
 	// std::string	_UserName;
 	// std::string	_UserPassword;
 	std::string	_UserHost;
+	bool		_connected;
 
 	public :
 
