@@ -4,7 +4,7 @@ CC = c++
 SRC_DIR = .
 OBJ_DIR = obj
 
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:%.cpp=%.o))
 

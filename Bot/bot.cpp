@@ -12,6 +12,7 @@
 #include <limits>
 #include <cstdlib>
 #include <map>
+#include <regex.h>
 #include <time.h>
 
 std::string		parse(std::string contenu)
@@ -28,8 +29,8 @@ std::string		parse2(std::string contenu)
 	std::string find = "<|#()#|>";
 	size_t found = contenu.find(find);
 
-	contenu.erase(0, found);
-	contenu.erase(0, 8);
+	contenu.erase(0, found -1);
+	contenu.erase(0, 9);
 	return contenu;
 }
 
@@ -45,45 +46,110 @@ int	send_msg(std::string msg, int socketDescriptor)
  	}
 	return 0;
 }
+std::string pars_msg(std::string message)
+{
+	//    std::string message = "redarnet PRIVMSG #BOTCHAN ::bonjour";
+	size_t po = message.find("#BOTCHAN ::");
+
+	message.erase(0, po);
+	message.erase(0, 11);
+	po = message.find("\r");
+	while (po != std::string::npos)
+	{
+		message.erase(po, 1);
+		po = message.find("\r");
+	}
+	po = message.find("\n");
+	while (po != std::string::npos)
+	{
+		message.erase(po, 1);
+		po = message.find("\n");
+	}
+	po = message.find(" ");
+	while (po != std::string::npos)
+	{
+		message.erase(po, 1);
+		po = message.find(" ");
+	}
+	return message;
+}
 
 void	send_question(std::map<std::string, std::string> question, int socketDescriptor)
 {
 	int ale;
 	char msg[4096];
-	const char * s;
+	std::string message;
+	std::cout << " here" << std::endl;
 
 	std::map<std::string, std::string>::iterator it = question.begin();
 
 	srand(time(NULL));
 	ale = (rand() % question.size()) + 1;
-	for (int i = 0; i != ale; i++)
+	for (int i = 0; i != ale - 1; i++)
 		it++;
-	send_msg(it->first, socketDescriptor);
-	s =  const_cast<char *>(it->second.c_str());
-	if (recv(socketDescriptor, msg, 4096, 0) < 0)
-			std::cout << "** Le serveur n'a répondu dans la seconde.\n";
-	if (strncmp(msg , s, strlen(s)) == 0)
-		std::cout << "GJ" << std::endl;
-	else
-		std::cout << "wrong" << std::endl;
-
+	std::cout << " SEND " << it->first << std::endl;
+	send_msg("PRIVMSG #BOTCHAN ::" +it->first, socketDescriptor);
+	usleep(1000000);
+	while (1)
+	{
+		// if (send_msg("PING \n", socketDescriptor) < 0)
+		// 	return ;
+		if (recv(socketDescriptor, msg, 4096, 0) < 0)
+				std::cout << "** Le serveur n'a répondu dans la seconde.\n";
+		message = pars_msg(msg);
+		std::cout << "reponse = " << message << std::endl;
+		std::cout << "reponse = " << it->second << std::endl;
+		size_t po = it->second.find(" ");
+		while (po != std::string::npos)
+		{
+			it->second.erase(po, 1);
+			po = it->second.find(" ");
+		}
+		if (message == "")
+			;
+		else if (message == it->second)
+		{
+			std::cout << "GJ" << std::endl;
+			send_msg("PRIVMSG #BOTCHAN ::GJ \r\n", socketDescriptor);
+			memset(msg, 0 , 4096);
+			return ;
+		}
+		else
+		{
+			std::cout << "wrong" << std::endl;
+			send_msg("PRIVMSG #BOTCHAN ::wrong \r\n", socketDescriptor);
+			memset(msg, 0 , 4096);
+			return ;
+		}
+		memset(msg, 0 , 4096);
+		usleep(1000000);
+	}
 }
 
 int main()
 {
 	std::map<std::string, std::string> question;
 	std::string contenu;
+	std::string message;
+	char msg[4096];
 	int	socketDescriptor = 0;
 	struct sockaddr_in serverAddress;
-	struct timeval timeVal;
 
 	std::ifstream ifs("question.txt");
 	if (!ifs)
+	{
+		std::cout << "error ifs\n" ;
 		return 0;
-
+	}
 	while (getline(ifs, contenu))
 		question.insert(std::pair<std::string, std::string> (parse(contenu), parse2(contenu)));
+	// std::map<std::string, std::string>::iterator it = question.begin();
+	// while (it != question.end()) {
+	// 	std::cout << it->first << " : " << it->second << std::endl;
+	// 	++it;
+	// }
 	struct hostent *hostInfo;
+
 
 	if ((hostInfo = gethostbyname("127.0.0.1")) == NULL)
 		return (std::cout << "error host \n", -1);
@@ -94,29 +160,27 @@ int main()
 	hostInfo->h_addr_list[0], hostInfo->h_length);
 	serverAddress.sin_port = htons(6667);
 	connect(socketDescriptor, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-	if (send_msg("test", socketDescriptor) < 0)
+	if (send_msg("NICK BOT\n", socketDescriptor) < 0)
 		return 0;
-	std::string ind;
-	char msg[4096];
-	char *s = strdup("!question");
-	timeVal.tv_sec = 1;
-	timeVal.tv_usec = 0;
+	if (send_msg("JOIN #BOTCHAN\n", socketDescriptor) < 0)
+		return 0;
+	if(recv(socketDescriptor, msg, 4096, 0) < 0)
+		std::cout << "** Le serveur n'a répondu dans la seconde.\n";
+	std::cout << "msg = " << msg << std::endl;
+	memset(msg, 0 , 4096);
 	while (1)
 	{
-		std::cout << "Msg" << std::endl;
-		std::getline(std::cin , ind);
-		if (std::cin.eof() == 1)
-			return -1;
-		if (send_msg(ind, socketDescriptor) < 0)
+		if (send_msg("PING \n", socketDescriptor) < 0)
 			return 0;
-		if(recv(socketDescriptor, msg, 4096, 0) < 0)
-			std::cout << "** Le serveur n'a répondu dans la seconde.\n";
+		if(recv(socketDescriptor, msg, 4096, 0) == 0)
+			return (std::cout << "** Le serveur n'a répondu dans la seconde.\n", 0);
 		std::cout << "msg = " << msg << std::endl;
-		if (strncmp(msg , s, strlen(s)) == 0)
-			send_question(question, socketDescriptor);
+		message = pars_msg(msg);
+		std::cout << "message = " << message << std::endl;
+		 if (message ==  "!question")
+		 	send_question(question, socketDescriptor);
 		memset(msg, 0 , 4096);
-
-		usleep(100);
+		usleep(1000000);
 	}
 	return 0;
 }

@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/28 04:01:36 by redarnet         ###   ########.fr       */
+/*   Updated: 2022/12/28 19:17:38 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,19 +206,8 @@ int Server::rcvFromClient(int pos, int fd)
             str.erase(po, 1);
             po = str.find("\r");
         }
-		// std::string str2;
-		// for (size_t i= 0; i< str.length(); i++)
-		// {
-		// 	if (str[i] != '\n')
-		// 		str2 += str[i];
-		// 	else
-		// 		str2 += '|';
-		// }
-		// for (size_t i = 0; i < strlen(buf); i++)
-		// 	std::cout << buf[i] << "|" ;
-
 	std::map<int, User *>::iterator it = Users.find(fd);
-	if (it->second->getUserNick() == "yo")
+	if (it->second->getUserNick() == "")
 		setUserInfo(str, fd);
 	else
 	{

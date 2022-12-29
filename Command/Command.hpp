@@ -44,7 +44,7 @@ class	Command
 		int ping(User *U);
 		int mode(User *U);
 		int privmsg(User *U);
-		int privmsg_user(User *U);
+		int privmsg_user(User *U, std::string msg);
 		/* Destructor */
 		~Command(void);
 };
