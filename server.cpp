@@ -6,7 +6,11 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/12/29 18:16:30 by mettien          ###   ########.fr       */
+=======
+/*   Updated: 2022/12/27 22:32:23 by mettien          ###   ########.fr       */
+>>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +24,7 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_passwd = input_passwd;
 	this->_listenerSock = 0;
 	this->_sock = 0; // * utile? *
-	this->_fdCount = 1;
+	// this->_fdCount = 1;
 }
 
 Server::~Server() {}
@@ -41,8 +45,11 @@ int Server::createSocket()
 {
 	///////  Creation du socket  ////////
 
+	int val = 1;
 	_listenerSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listenerSock == -1)
+		return -1;
+	if (setsockopt(_listenerSock, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &val, sizeof(val)) < 0)
 		return -1;
 	if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en mode non bloquant
 		return -1;
@@ -68,49 +75,47 @@ int Server::createSocket()
 
 	if (listen(_listenerSock, SOMAXCONN) < 0) /* check max listened sockets */
 		return -1;
-	Server::add_fd_ToList(_listenerSock, POLLIN, 1);
+	Server::add_fd(_listenerSock, POLLIN, 1);
 	return 0;
 }
 
-void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom par add user/fd */
+void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add user/fd */
 {
 	/////   Set up des evenements du fd   /////
 	
-	// pollfd  pfd;
-	// pfd.fd = sock;
-	// pfd.events = event;
-	if (isServer)
-		_fdCount = 0;
-	std::cout << _fdCount << std::endl;
-	// _pfds.insert(std::pair<int, pollfd>(_fdCount, pfd));
+	if (!isServer)
+	{
+		User *new_user =  new User();
+		if (Users.count(sock) > 0)						// check si Users deja existant
+			return;
+		Users.insert(std::pair<int, User *>(sock, new_user));
+		std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
+		send(sock, response.c_str(), response.size(), 0);
+	}
 	_pfds.push_back(pollfd());
 	_pfds.back().fd = sock;
 	_pfds.back().events = event;
 	_pfds.back().revents = 0;
-	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
-	std::cout << "----- FD MAP -----" << std::endl;
+	std::cout << std::endl << "New Client on socket #" << sock << "." << std::endl;
+	std::cout << "-----------------" << std::endl;
 	std::vector<pollfd> :: iterator it;
+<<<<<<< HEAD
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
 	
+=======
+	for(it = _pfds.begin(); it != _pfds.end(); it++)
+>>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
 	{
 	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
 	std::cout << "------------------" << std::endl << std::endl;
-	if (!isServer)
-	{
-		User *U =  new User("hello");
-		Users.insert(std::pair<int, User *>(sock, U));
-		std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
-		send(sock, response.c_str(), response.size(), 0);
-	}
-	_fdCount++;
-	std::cout << _fdCount << std::endl;	
 }
 
 int Server::waitConnection()
 {
 	int nb_event = 0;
 	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
+<<<<<<< HEAD
 
 	_pfds[0].revents = 0;
 	for (int i = 0; i < _fdCount; i++)
@@ -118,8 +123,14 @@ int Server::waitConnection()
 		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
 	}
 	nb_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
+=======
+	// for (size_t i = 0; i < _pfds.size(); i++)
+	// {
+		// std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
+	// }
+	nb_event = poll(&_pfds[0], _pfds.size(), -1);  /* changer le timeout */
+>>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
 	std::cout << "Poll result : " << nb_event << std::endl;
-	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
 	if (nb_event == -1)
 	{
 		std::cout << "Poll failed " << std::endl;
@@ -132,11 +143,9 @@ int Server::waitConnection()
 	}
 
 	/////  Boucle d'attente de connexions entrantes ou existantes   ///////
-	// std::cout << _fdCount << "|" << current_size << std::endl;
-	int currentSize = _fdCount;
+	int currentSize = _pfds.size();
 	for (int i = 0; i < currentSize; i++)
 	{
-		// std::cout << _fdCount << "|" << currentSize << std::endl;
 		if (_pfds[i].revents == 0) 								// Ce socket n'a pas fait d'appel
 			continue;
 		if (_pfds[i].revents != POLLIN)
@@ -162,23 +171,24 @@ int Server::rcvFromClient(int pos, int fd)
 {
 	std::cout << std::endl << "4) Server receving data ..." << std::endl;
 	
-	char buf[4096];								/* size adequate? */
+	char buf[BUFFERSIZE + 1];								/* size adequate? */
+	ssize_t byteRcv;
 	
 	/////  Reception de toutes les donnees sur le socket client   /////
 	
-	memset(buf, 0, 4096); 			
-	int byteRcv = recv(fd, buf, 4096, 0);							// Reception des strings
+	memset(buf, 0, BUFFERSIZE + 1); 			
+	byteRcv = recv(fd, buf, BUFFERSIZE + 1, 0);							// Reception des strings
 	if (byteRcv == -1)
 		return -1;
 	else if (byteRcv == 0)
 	{
 		std::cout << "5) The client disconnected" << std::endl;
 		_pfds.erase(_pfds.begin() + pos);
-		_fdCount--;
+		Users.erase(fd);
 		return 0;
 	}
-	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
+	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+	Server::getUser(fd)->setBuf(std::string(buf));
 	return 0;
 }
 
@@ -203,7 +213,7 @@ int Server::newClient()
 			break;
 		}
 		std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
-		Server::add_fd_ToList(newClient, POLLIN, 0);
+		Server::add_fd(newClient, POLLIN, 0);
 	} while (newClient != -1); // * condition a revoir * //
 	return 0;
 }
@@ -223,6 +233,16 @@ std::string Server::getPasswd() const
 	return (this->_passwd);
 }
 
+User *Server::getUser(int fd) const
+{
+	std::map<int, User*>::const_iterator	it;
+
+	it = Users.find(fd);
+	if (it == Users.end())
+		return NULL;
+	return it->second;
+}
+
 bool Server::hasPasswd() const
 {
 	return (!this->_passwd.empty());
@@ -240,7 +260,6 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 			return false;
 		return true;
 	}
-	// check des criteres de password ?? Idk
 	return false;
 }
 

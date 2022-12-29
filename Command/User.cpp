@@ -8,9 +8,9 @@
 // }
 
 
-User::User (std::string command) : _cmd(command)
+User::User () 
 {
-	std::cout << "Command: " << this->_cmd << std::endl;
+	
 }
 
 User::User(User const & cpy){
@@ -28,6 +28,11 @@ void User::setCmd(std::string command)
 	this->_cmd = command;
 }
 
+void User::setBuf(std::string buffer)
+{
+
+	std::cout << "The buffer received [ " << buffer << " ]." << std::endl;
+}
 
 std::string const & User::getUserHost() const
 {

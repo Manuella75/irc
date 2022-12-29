@@ -13,11 +13,12 @@ class	User
 	// std::string	_UserName;
 	// std::string	_UserPassword;
 	std::string	_UserHost;
+	bool		_connected;
 
 	public :
 
 	/* Constructor */
-	User(std::string cmd);
+	User();
 	User(User const & cpy);
 	User &operator=(User const & rhs);
 	std::string const & getUserHost() const;
@@ -28,6 +29,7 @@ class	User
 
 	/* Member functions */
 	void setCmd(std::string command);
+	void setBuf(std::string buffer);
 };
 
 #endif

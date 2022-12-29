@@ -6,7 +6,11 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/12/29 21:46:59 by mettien          ###   ########.fr       */
+=======
+/*   Updated: 2022/12/27 21:43:07 by mettien          ###   ########.fr       */
+>>>>>>> f18e2f4dd97cf32a12ec2d3742b797bc05a51922
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +48,12 @@ int	main (int argc, char **argv)
 	-hamdle error msg	
 	-check pb fuser
 	-ping pong
-	-timeout-
+	-timeout
 	-mode
 	-envoie du welcome juste apres nick et user
 	-user nickname max 9
+	-max users
+	-maxbacklog
 
 	Server Operator:
 	-/OPER <userid> <password> (authentification pr etre IRCOPERATOR)
