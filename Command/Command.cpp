@@ -19,6 +19,7 @@ std::vector<std::string> split_splace1(std::vector<std::string>& v) {
  	 }
 	 return v;
 }
+
 void sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
   // Construisez le message de confirmation en suivant le format du protocole IRC
   std::string message = ": 001 "  + Username + " " + confirmationMessage + "\r\n";
@@ -65,8 +66,11 @@ int	Command::nick(User *U)
 		}
 	}
 	U->setUserNick(arguments[0]);
-	std::cout << "New Nick is " << U->getUserNick() << std::endl;
-	sendConfirmationMessage(U->getUserSocket(), "new NICK", U->getUserNick() );
+	// std::string message =  ": 001 test" + arguments[0] + "New Nick \r\n";
+	// std::cout << "New Nick is " << U->getUserNick() << std::endl;
+	// send(U->getUserSocket(), message.c_str(), message.length(), 0);
+	std::string message =  "Your new Nick is " + U->getUserNick();
+	sendConfirmationMessage(U->getUserSocket(), message, U->getUserNick() );
 	return 0;
 }
 
@@ -81,25 +85,33 @@ int	Command::user(User  *U)
 		reply(461);
 		return (-1);
 	}
-	if (U->username.size() != 0)
-	{
-		reply(462);
-		return (-1);
-	}
-	U->username = arguments[0];
+	// if (U->getUserNick().size() != 0)
+	// {
+	// 	reply(462);
+	// 	return (-1);
+	// }
+	U->realname = "Remi Darnet";
+	// U->setUserNick(arguments[0]);
+	U->setUserHost(arguments[1]);
+
 	U->setUserMode(atoi(arguments[1].c_str()));
-	U->realname = arguments[2];
+	 std::string message = ":localhost 127.0.0.1 " + U->getUserNick() +
+	  " " + U->getUserNick() + " " + U->getUserNick() + " " + U->getUserHost() + " * :" + U->realname;
+	std::cout << " User message =" << message << std::endl;
 	return (1);
 }
 
 int	Command::whois(User *U)
 {
 	std::cout << "COMMAND WHHOIS" << std::endl;
+	 std::string message = ":localhost 127.0.0.1 " + U->getUserNick() +
+	  " " + U->getUserNick() + " " + U->getUserNick() + " " + U->getUserHost() + " * :" + U->realname;
+	std::cout << " Whois message =" << message << std::endl;
+	send(U->getUserSocket(),message.c_str(), message.size(), 0);
 	// a voir pour l envoie au client
-	std::cout << U->getUserNick() << std::endl;
-	 std::string reponse = ":" + U->username +
-	 " utilisateur utilisateur * :Nom réel\r\n";
-	send(U->getUserSocket(), reponse.c_str(), reponse.size(), 0);
+	//  std::string reponse = ":" + U->username +
+	//  " utilisateur utilisateur * :Nom réel\r\n";
+	// send(U->getUserSocket(), reponse.c_str(), reponse.size(), 0);
 	return (0);
 }
 
@@ -115,53 +127,80 @@ int Command::join(User *U)
 	if (arguments.empty())
 		return -1;
 	// si le channel n existe pas > on le cree
+	std::string message;
 	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
 	if (it == Chan.end())
 	{
 		Channel *Cha =new Channel(arguments[0], U);
 		Chan.insert(std::pair<std::string, Channel *>(arguments[0], Cha));
-		std::string message = "JOIN " + arguments[0] + "\r\n";
-		// std::string message = "JOIN #le\r\n";
+		message = ":" + U->getUserNick() + " JOIN " + arguments[0] + "\r\n";
 		std::cout << "message = " << message << std::endl;
+		send(U->getUserSocket(), message.c_str(), message.length(), 0);
+		message = ":" + U->getUserNick() + " TOPIC " + arguments[0] + " :salade";
+		std::cout << " ici" << message <<  std::endl;
 		send(U->getUserSocket(), message.c_str(), message.length(), 0);
 		return (0);
 	}
+
 	// si le User est deja dans le channel
 	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
 	if (itUser != it->second->getUsers().end())
 		return -1;
+		//on previent les autres dans le channel
+	for (itUser = it->second->getUsers().begin(); itUser != it->second->getUsers().end(); itUser++)
+	{
+		message = ":" + U->getUserNick() + " JOIN " + arguments[0] + "\r\n";
+		send(itUser->second->getUserSocket(), message.c_str(), message.length(), 0);
+		message.clear();
+	}
 	//on rajoute le User dans le Channel
 	U->setUserMode(1);
 	U->setUserChannel(arguments[0]);
 	User  *Us =  new  User(U);
 	it->second->getUsers().insert(std::pair<int, User *>(U->getUserSocket(), Us));
+	message = ":" + U->getUserNick() + " JOIN " + arguments[0] + "\r\n";
+	std::cout << "message = " << message << std::endl;
+	send(U->getUserSocket(), message.c_str(), message.length(), 0);
 	return (0);
 }
 
 //permet de quitter un chanell
+//:<nickname>@<username>!<hostname> <COMMAND> <arg>\r
 int Command::part(User *U)
 {
+	std::string message;
+
 	std::cout << "COMMAND PART" << std::endl;
 	if (arguments.empty())
 		return -1;
-	// std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
-	std::map<std::string, Channel *>::iterator it = Chan.begin();
+	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	// std::map<std::string, Channel *>::iterator it = Chan.begin();
 	//si le channel exist pas
 	if (it == Chan.end())
 		return -1;
 	// std::string message = "PART" + U->getUserChannel() + "\r\n";
-	std::string message = "PART " + arguments[0] + "\r\n";
-	std::cout << "message = " << message << std::endl;
-	send(U->getUserSocket(), message.c_str(), message.length(), 0);
-	std::cout << "message = " << message << std::endl;
-	send(U->getUserSocket(), message.c_str(), message.length(), 0);
+
+	std::map<int, User *>::const_iterator itUser;
+	// for (itUser = it->second->getUsers().begin(); itUser != it->second->getUsers().end(); itUser++)
+	// {
+		message = ":" + U->getUserNick() + " PART " + arguments[0] + "\r\n";
+		std::cout << "message = " << message << std::endl;
+		std::cout << "socket  = " << U->getUserSocket() << std::endl;
+		send(U->getUserSocket(), message.c_str(), message.length(), 0);
+		message.clear();
+	// }
 	// on trouve le User et on le delete
-	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
+	itUser = it->second->getUsers().find(U->getUserSocket());
 	if (itUser != it->second->getUsers().end())
 		delete itUser->second;
 	it->second->getUsers().erase(U->getUserSocket());
 	U->setUserMode(2);
 	U->setUserChannel("");
+	//affiche users restant dans le chann
+	for (itUser = it->second->getUsers().begin(); itUser != it->second->getUsers().end(); itUser++)
+	{
+		std::cout << itUser->second->getUserNick() << std::endl;
+	}
 	// si plus de Users delete le channel
 	if (it->second->getUsers().size() == 0)
 	{

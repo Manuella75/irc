@@ -71,7 +71,10 @@ void  User::setUserNick(std::string nick)
 {
 	_nickname = nick;
 }
-
+void  User::setUserHost(std::string host)
+{
+	_UserHosts = host;
+}
 void  User::setUserChannel(std::string chann)
 {
 	_channel = chann;

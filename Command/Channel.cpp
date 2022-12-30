@@ -6,6 +6,7 @@ Channel::Channel(std::string  name, User U) : _name(name)
 	U.setUserMode(1);
 	U.setUserChannel(name);
 	_Users.insert(std::pair<int , User *>(U.getUserSocket(), Us));
+	std::cout << "User in JOIN = " << U.getUserNick() << std::endl;
 
 }
 

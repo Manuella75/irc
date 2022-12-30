@@ -18,7 +18,6 @@ class	User
 	std::string _cmd;
 
 	public :
-		std::string  username;
 		std::string realname;
 		/* Constructor */
 		User(std::string host, int socket);
@@ -30,6 +29,7 @@ class	User
 		int					getUserMode() const ;
 		void				setUserMode(int mode);
 		void				setUserNick(std::string Nick);
+		void				setUserHost(std::string host);
 		void				setUserChannel(std::string chann);
 		void	setCmd(std::string command);
 		std::string			const getUserChannel() const;
