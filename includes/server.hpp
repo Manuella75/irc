@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/29 22:42:19 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/30 01:17:32 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,6 @@
 #include "../Command/Channel.hpp"
 
 #define BUFFERSIZE 512
-// class Command;
-// class User;
 
 class Channel;
 class Server

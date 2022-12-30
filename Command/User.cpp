@@ -9,9 +9,11 @@
 
 User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
-	_mode = 2;
+	_mode = "i";
 	_nickname = "";
 	_channel = "";
+	_connected = true;
+
 }
 
 User::User(User const & cpy){
@@ -85,5 +87,6 @@ void  User::setUserChannel(std::string chann)
 
 User::~User(void)
 {
+	_connected = false;
 	return ;
 }

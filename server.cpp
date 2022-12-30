@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/29 22:51:36 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/30 01:24:04 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,7 +223,7 @@ int Server::newClient()
 		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
 		// if (fcntl(newClient, F_SETFL, O_NONBLOCK) < 0) 		// set le socket en mode non bloquant
 			// return -1;
-		std::cout << "Accept() = "<< newClient << std::endl;
+		// std::cout << "Accept() = "<< newClient << std::endl;
 		if (newClient < 0)
 		{
 			if (errno != EWOULDBLOCK)
@@ -231,15 +231,9 @@ int Server::newClient()
 			// std::cout << errno << " - " << strerror(errno) << std::endl;
 			break;
 		}
-			// ":<server> 001 <nick> :Welcome to the <network> Network, <nick>[!<user>@<host>]"
-		//    reponse = ":127.0.0.1 003 redarnet :This server was created <datetime>\r\n";
-		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-		// 	reponse = ":127.0.0.1 004 redarnet server <version> <available umodes> <available cmodes> [<cmodes with param>]";
-		// 	send(clientSock, reponse.c_str(), reponse.size(), 0);
-	// close(clientSock); // a enlever
 	std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
 	Server::add_fd(newClient, POLLIN, 0);
-	} while (newClient != -1); // * condition a revoir * //
+	} while (newClient != -1);
 	return 0;
 }
 

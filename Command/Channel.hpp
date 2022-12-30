@@ -10,19 +10,27 @@
 class Channel
 {
 	private:
-		std::string _name; // channel name
-		std::string _topic; // chanel topic
-		std::map<int, User *> _Users; // channel users
+		std::string 					_name; // channel name
+		std::string 					_topic; // chanel topic
+		std::map<int, User *> 			_Users; // channel users
+		User							*_creator; // the creator
+
 	public :
 	 	Channel(std::string const  name, User U);
 		Channel(Channel const &cpy);
 		Channel(Channel * cpy);
 		~Channel();
 		Channel & operator=(Channel const & rhs);
-		std::string const & getName() const;
-		std::string const & getTopic() const;
-		std::map<int, User *> const  & getUsers() const;
-		std::map<int, User *>  & getUsers();
+
+
+		User*							getCreator() const;
+		User*							getAMember(std::string member) const;
+		std::string const & 			getName() const;
+		std::string const & 			getTopic() const;
+		std::map<int, User *> const& 	getUsers() const;
+		std::map<int, User *>  & 		getUsers();
+
+		//-------------------------------------------------------//
 
 };
 #endif

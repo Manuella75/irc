@@ -29,6 +29,18 @@ Channel &Channel::operator=(Channel const & rhs)
 Channel::~Channel()
 {}
 
+//User *Channel::getAMember(std::string member) const
+//{
+//	std::map<int, User*>::const_iterator	it;
+//	
+//	for (it = User.begin(); it != User.end(); ++it)
+//	{
+//		if (it->second && it->second->getUserNick() == member)
+//			return it->second;
+//	}
+//	return NULL;
+//}
+
 std::string const & Channel::getName() const
 {
 	return _name;

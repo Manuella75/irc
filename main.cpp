@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/29 22:43:46 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/30 00:49:07 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,11 @@ int	main (int argc, char **argv)
 	-user nickname max 9
 	-max users
 	-maxbacklog
-
+	-user invisible a l'arrivee
+	-message du nick si deja utiliser
+	 -message mode du chan a larrivee
+	 channel delete si ops part sans user connected
+	 
 	Server Operator:
 	-/OPER <userid> <password> (authentification pr etre IRCOPERATOR)
 	-/KILL <nick> [message] (virer qq du serveur,deconnexion)
@@ -65,7 +69,8 @@ int	main (int argc, char **argv)
 	MODE
 		*Channel*
 		- +m(moderated), seuls users +v peuvent parler
+		- +v(voiced) donne voix a un user, si mode +m
 		- +i(invite) , users doit etre inviter
 		- +l, limite le nb de users ds un chan
-		- +
+		
  */

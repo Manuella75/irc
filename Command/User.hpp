@@ -10,12 +10,14 @@
 class	User
 {
 	private :
-	std::string	_nickname;
-	std::string	_UserHosts;
-	int _mode;
-	int _socket;
-	std::string _channel;
-	std::string _cmd;
+	int 						_socket;
+	std::string					_nickname;
+	std::string					_UserHosts;
+	std::string 				_channel;
+	std::string 				_cmd;
+	std::map<std::string,bool> 	_mode;
+	bool						_connected;
+	time_t						_lastConnect;
 
 	public :
 		std::string  username;
