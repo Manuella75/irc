@@ -7,9 +7,9 @@
 	// return ;
 // }
 
-User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
+User::User (std::string host, int socket) : _socket(socket), _UserHosts(host)
 {
-	_mode = "i";
+	//_mode = "i";
 	_nickname = "";
 	_channel = "";
 	_connected = true;
@@ -32,6 +32,11 @@ User & User::operator=(User const & rhs)
 	this->_mode = rhs.getUserMode();
 	this->_channel = rhs.getUserChannel();
 	return *this;
+}
+
+void	User::disconnect(void)
+{
+	this->_connected = false;
 }
 
 void User::setCmd(std::string command)
@@ -87,6 +92,5 @@ void  User::setUserChannel(std::string chann)
 
 User::~User(void)
 {
-	_connected = false;
 	return ;
 }

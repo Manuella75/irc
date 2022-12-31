@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/30 01:24:04 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/31 06:17:19 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,8 @@ void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add
 		if (Users.count(sock) > 0)						// check si Users deja existant
 			return;
 		Users.insert(std::pair<int, User *>(sock, new_user));
-		std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
-		send(sock, response.c_str(), response.size(), 0);
+		// std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
+		// send(sock, response.c_str(), response.size(), 0);
 	}
 	_pfds.push_back(pollfd());
 	_pfds.back().fd = sock;
@@ -106,11 +106,8 @@ int Server::waitConnection()
 {
 	int nb_event = 0;
 	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
-	// for (size_t i = 0; i < _pfds.size(); i++)
-	// {
-		// std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
-	// }
-	nb_event = poll(&_pfds[0], _pfds.size(), -1);  /* changer le timeout */
+	Server::sendPing();
+	nb_event = poll(&_pfds[0], _pfds.size(), 5000);  /* changer le timeout */
 	std::cout << "Poll result : " << nb_event << std::endl;
 	if (nb_event == -1)
 	{
@@ -194,10 +191,10 @@ int Server::rcvFromClient(int pos, int fd)
 	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
 	std::string str = buf;
 	size_t po = str.find("\r");
-        while (po != std::string::npos) {
-            str.erase(po, 1);
-            po = str.find("\r");
-        }
+    while (po != std::string::npos) {
+        str.erase(po, 1);
+        po = str.find("\r");
+    }
 	std::map<int, User *>::iterator it = Users.find(fd);
 	if (it->second->getUserNick() == "")
 		setUserInfo(str, fd);
@@ -207,7 +204,6 @@ int Server::rcvFromClient(int pos, int fd)
 		Users =  cmd.set_Users();
 		Chan =  cmd.set_Chan();
 	}
-	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
 	return 0;
 }
 

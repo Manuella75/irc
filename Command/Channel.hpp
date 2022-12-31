@@ -16,7 +16,7 @@ class Channel
 		User							*_creator; // the creator
 
 	public :
-	 	Channel(std::string const  name, User U);
+	 	Channel(std::string const  name, User *creator);
 		Channel(Channel const &cpy);
 		Channel(Channel * cpy);
 		~Channel();
@@ -30,7 +30,8 @@ class Channel
 		std::map<int, User *> const& 	getUsers() const;
 		std::map<int, User *>  & 		getUsers();
 
-		//-------------------------------------------------------//
+		void							kickMember(User *member);
+		void							addMember(User *member);
 
-};
+};	
 #endif

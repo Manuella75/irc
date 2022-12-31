@@ -15,29 +15,34 @@ class	User
 	std::string					_UserHosts;
 	std::string 				_channel;
 	std::string 				_cmd;
-	std::map<std::string,bool> 	_mode;
+	int					_mode;
 	bool						_connected;
 	time_t						_lastConnect;
 
 	public :
 		std::string  username;
 		std::string realname;
+
 		/* Constructor */
 		User(std::string host, int socket);
 		User(User const & cpy);
 		User(User  * cpy);
 		User &operator=(User const & rhs);
-		std::string const & getUserHost() const;
-		std::string		const	getUserNick() const;
-		int					getUserMode() const ;
-		void				setUserMode(int mode);
-		void				setUserNick(std::string Nick);
-		void				setUserChannel(std::string chann);
-		void	setCmd(std::string command);
-		std::string			const getUserChannel() const;
-		int					getUserSocket() const;
 		/* Destructor */
 		~User(void);
+
+		std::string const & 	getUserHost() const;
+		std::string	const		getUserNick() const;
+		int						getUserMode() const ;
+		std::string	const 		getUserChannel() const;
+		int						getUserSocket() const;
+
+		void					setUserMode(int mode);
+		void					setUserNick(std::string Nick);
+		void					setUserChannel(std::string chann);
+		void					setCmd(std::string command);
+
+		void					disconnect();
 };
 
 #endif

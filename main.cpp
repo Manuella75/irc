@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/30 00:49:07 by mettien          ###   ########.fr       */
+/*   Updated: 2022/12/31 00:25:48 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,4 +73,7 @@ int	main (int argc, char **argv)
 		- +i(invite) , users doit etre inviter
 		- +l, limite le nb de users ds un chan
 		
+		*User*
+		
+		-
  */

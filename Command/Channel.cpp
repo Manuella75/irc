@@ -1,12 +1,12 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string  name, User U) : _name(name)
+Channel::Channel(std::string  name, User *creator) : _name(name), _creator(creator)
 {
-	User  *Us =  new  User(U);
-	U.setUserMode(1);
-	U.setUserChannel(name);
-	_Users.insert(std::pair<int , User *>(U.getUserSocket(), Us));
-
+	//User  *Us =  new  User(U);
+	creator->setUserMode(1);
+	creator->setUserChannel(name);
+	_Users.insert(std::pair<int , User *>(creator->getUserSocket(), creator));
+	_topic = "";
 }
 
 Channel:: Channel(Channel const & cpy)
@@ -29,17 +29,29 @@ Channel &Channel::operator=(Channel const & rhs)
 Channel::~Channel()
 {}
 
-//User *Channel::getAMember(std::string member) const
-//{
-//	std::map<int, User*>::const_iterator	it;
-//	
-//	for (it = User.begin(); it != User.end(); ++it)
-//	{
-//		if (it->second && it->second->getUserNick() == member)
-//			return it->second;
-//	}
-//	return NULL;
-//}
+User *Channel::getAMember(std::string member) const
+{
+	std::map<int, User*>::const_iterator	it;
+	
+	for (it = _Users.begin(); it != _Users.end(); ++it)
+	{
+		if (it->second && it->second->getUserNick() == member)
+			return it->second;
+	}
+	return NULL;
+}
+
+void	Channel::kickMember(User *member)
+{
+	if (member != NULL && _Users.find(member->getUserSocket()) != _Users.end())
+		_Users.erase(member->getUserSocket());
+}
+
+void	Channel::addMember(User *member)
+{
+	if (member != NULL)
+		_Users.insert(std::make_pair(member->getUserSocket(), member));
+}
 
 std::string const & Channel::getName() const
 {
