@@ -43,8 +43,11 @@ class	Command
 		int part(User *U);
 		int ping(User *U);
 		int mode(User *U);
+		int topic(User *U);
 		int privmsg(User *U);
 		int privmsg_user(User *U, std::string msg);
+		int	kick(User *U);
+		void	send_message_chan(User *U, std::string message, Channel chan);
 		/* Destructor */
 		~Command(void);
 };

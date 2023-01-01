@@ -12,9 +12,12 @@ class	User
 	private :
 	std::string	_nickname;
 	std::string	_UserHosts;
-	int _mode;
 	int _socket;
-	std::string _channel;
+	// std::string _channel;
+	std::map<std::string, bool> _channel;
+	//vecteur >  delete  juste delete le chann ou on est
+	//join check si ca existe si ca existe delete et met le a la fin sinon insrt
+
 	std::string _cmd;
 
 	public :
@@ -26,14 +29,14 @@ class	User
 		User &operator=(User const & rhs);
 		std::string const & getUserHost() const;
 		std::string		const	getUserNick() const;
-		int					getUserMode() const ;
-		void				setUserMode(int mode);
 		void				setUserNick(std::string Nick);
 		void				setUserHost(std::string host);
-		void				setUserChannel(std::string chann);
+		void				setUserChannel(std::string chann, bool bo);
 		void	setCmd(std::string command);
-		std::string			const getUserChannel() const;
+		std::map<std::string, bool>			const getUserChannel() const;
+		std::string			const getUserlastChannel() const;
 		int					getUserSocket() const;
+		void	deleteUserlastChannel();
 		/* Destructor */
 		~User(void);
 };

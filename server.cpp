@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/30 18:23:18 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/01 18:41:08 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int Server::createSocket()
 		return -1;
 	if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en mode non bloquant
 		return -1;
-	std::cout << std::endl << " 1) Socket created" << std::endl;
+	// std::cout << std::endl << " 1) Socket created" << std::endl;
 
 	/////// Set up des caracteristiques du socket //////
 
@@ -61,7 +61,7 @@ int Server::createSocket()
 
 	if (bind(_listenerSock, (struct sockaddr *)&listenerInfo, sizeof(listenerInfo)) < 0)
 		return -1;
-	std::cout << std::endl << " 2) Socket bounded" << std::endl;
+	// std::cout << std::endl << " 2) Socket bounded" << std::endl;
 
 	//// Socket en mode ecoute ////
 
@@ -86,14 +86,14 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 	_pfds.back().fd = sock;
 	_pfds.back().events = event;
 	_pfds.back().revents = 0;
-	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
-	std::cout << "----- FD MAP -----" << std::endl;
+	// std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
+	// std::cout << "----- FD MAP -----" << std::endl;
 	std::vector<pollfd> :: iterator it;
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
 	{
-	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
+	    // std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
-	std::cout << "------------------" << std::endl << std::endl;
+	// std::cout << "------------------" << std::endl << std::endl;
 	if (!isServer)
 	{
 		User  *U =  new  User("hello", sock);
@@ -111,14 +111,14 @@ void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom 
 int Server::waitConnection()
 {
 	int nb_event = 0;
-	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
+	// std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
 	_pfds[0].revents = 0;
 	for (int i = 0; i < _fdCount; i++)
 	{
-		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
+		// std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
 	}
 	nb_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
-	std::cout << "Poll result : " << nb_event << std::endl;
+	// std::cout << "Poll result : " << nb_event << std::endl;
 	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
 	if (nb_event == -1)
 	{

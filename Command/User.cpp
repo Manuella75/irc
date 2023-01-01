@@ -9,9 +9,7 @@
 
 User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
-	_mode = 2;
 	_nickname = "";
-	_channel = "";
 }
 
 User::User(User const & cpy){
@@ -27,7 +25,6 @@ User & User::operator=(User const & rhs)
 	this->_UserHosts = rhs.getUserHost();
 	this->_nickname = rhs.getUserNick();
 	this->_socket = rhs.getUserSocket();
-	this->_mode = rhs.getUserMode();
 	this->_channel = rhs.getUserChannel();
 	return *this;
 }
@@ -52,19 +49,17 @@ int  User::getUserSocket() const
 	return _socket;
 }
 
-int  User::getUserMode() const
-{
-	return _mode;
-}
 
-void  User::setUserMode(int mode)
-{
-	_mode = mode;
-}
-
-std::string const  User::getUserChannel() const
+std::map<std::string, bool> const  User::getUserChannel() const
 {
 	return _channel;
+}
+
+std::string const  User::getUserlastChannel() const
+{
+	std::map<std::string, bool>::const_iterator it = _channel.end();
+	it--;
+	return it->first;
 }
 
 void  User::setUserNick(std::string nick)
@@ -75,9 +70,19 @@ void  User::setUserHost(std::string host)
 {
 	_UserHosts = host;
 }
-void  User::setUserChannel(std::string chann)
+void  User::setUserChannel(std::string chann, bool bo)
 {
-	_channel = chann;
+	_channel.insert(std::pair<std::string, bool>(chann, bo));
+	// _channel = chann;
+}
+
+void User::deleteUserlastChannel()
+{
+	std::map<std::string, bool>::iterator it = _channel.begin();
+	for (;it != _channel.end(); it++)
+	;
+	it--;
+	_channel.erase(it);
 }
 
 User::~User(void)
