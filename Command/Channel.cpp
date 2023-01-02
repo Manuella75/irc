@@ -54,3 +54,8 @@ std::vector<int> const & Channel::getBanni() const
 {
 	return _Banni;
 }
+
+void  Channel::addBanni(int i)
+{
+	_Banni.push_back(i);
+}

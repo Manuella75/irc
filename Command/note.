@@ -1,14 +1,19 @@
-> PART canal plus join avec le bon msg
-> Join + topic en 2 eme arg 
-> cmd topic 
 > test arg User  + fix (mode , channel) user ne peux pas etre dans plusieurs chanel
 > cmd User
 > mode avec juste super user et user classic
   > kick
 > changer les msg pour que ce soit clean
 > list pour voir les chann dispo 
+> cmd topic finir 
+_
 
 but a regler = 
   - mag ou pas maj
   -espace apres premier arg 
-  - part bug av 2 user
+  - Ton nick ne doit pas excéder 9 caractères (e
+  -La commande /oper permet de t'authentificier au près du serveur 
+  afin que ce dernier te donne le status de IRCOperator.
+ - command invite a faire si channel mode = +i
+ - command notice a faire 
+ - command oper > idk admin > admin 
+    > topic > mode > invite > kick

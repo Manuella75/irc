@@ -45,6 +45,7 @@ class	Command
 		int mode(User *U);
 		int topic(User *U);
 		int privmsg(User *U);
+		int	oper(User *U);
 		int privmsg_user(User *U, std::string msg);
 		int	kick(User *U);
 		void	send_message_chan(User *U, std::string message, Channel chan);

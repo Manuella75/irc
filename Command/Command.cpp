@@ -128,6 +128,22 @@ int Command::join(User *U)
 		send_message_chan(U, "JOIN", Cha);
 		return (0);
 	}
+	//check si User est banni
+	std::vector<int>::const_iterator itbanni = it->second->getBanni().begin();
+	for (;itbanni != it->second->getBanni().end(); itbanni++)
+	{
+		if (*itbanni == U->getUserSocket())
+			break;
+	}
+	if (itbanni != it->second->getBanni().end())
+	{
+		std::string message = ":localhost 474 " + U->getUserNick() + " " + it->first + " :Cannot join channel (+b)";
+		std::cout <<"message = "<< message << std::endl;
+        send(U->getUserSocket(), message.c_str(), message.length(), 0);
+		return 0;
+	}
+
+
 
 	// si le User est deja dans le channel
 	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
@@ -169,6 +185,7 @@ int Command::part(User *U)
 	// si plus de Users delete le channel
 	if (it->second->getUsers().size() == 0)
 	{
+		std::cout << " here" << std::endl;
 		delete it->second;
 		Chan.erase(it);
 	}
@@ -215,6 +232,9 @@ int Command::ping(User *U)
 int Command::topic(User *U)
 {
 	std::cout << "COMMAND TOPIC" << std::endl;
+
+	if (U->oper  != 1)
+		return 0;
 	std::string message;
 	message = ":" + U->getUserNick() ;
 	message = ":" + U->getUserlastChannel();
@@ -266,6 +286,7 @@ int Command::privmsg(User *U)
 	return 0;
 }
 
+
 int	Command::kick(User *U)
 {
 	std::cout << "COMMAND KICK" << std::endl;
@@ -283,12 +304,43 @@ int	Command::kick(User *U)
 	{
 		if (arguments[1] == itUser->second->getUserNick())
 		{
-			send_message_chan(itUser->second, "PART", it->second);
+			if (itUser->second->oper == 1)
+				return(0);
+			if (itUser->second->getUserNick() == U->getUserNick())
+				return 0;
+			std::string	msg = ":" + U->getUserNick() + "!" + U->getUserHost() + "@localhost "
+		 + "KICK " + it->second->getName() + " " + itUser->second->getUserNick() +"\r\n";
+		 std::cout << "message = " << msg << std::endl;
+		send(itUser->second->getUserSocket(), msg.c_str(), msg.length(), 0);
+			//on ajoute le client dans un vec _banni
+			it->second->addBanni(itUser->second->getUserSocket());
+			// on delete le chann du users
+			std::map<int, User *>::iterator ir;
+			ir = this->set_Users().find(itUser->first);
+			ir->second->deleteUserlastChannel();
+			//on le delete du chann
+			delete itUser->second;
+			it->second->getUsers().erase(U->getUserSocket());
+			return (0);
 		}
-
 	}
+	return 0;
+}
 
+int	Command::oper(User *U)
+{
+	std::cout << "COMMAND OPER" << std::endl;
 
+	if (U->oper == 1)
+		return 0;
+	if (arguments[1] == "mdp")
+	{
+		std::string msg = ":" + U->getUserNick() + "!" + U->getUserHost() + "@localhost "
+			+  "New OPER \r\n";
+		std::cout << "msg =" << msg << " socket = " << U->getUserSocket() << std::endl;
+		send(U->getUserSocket(), msg.c_str(), msg.length(), 0);
+		U->oper = 1;
+	}
 	return 0;
 }
 
@@ -304,13 +356,15 @@ std::map<std::string, Channel *>  Command::set_Chan()
 
 int	Command::ft_exec_cmd(int clientSock)
 {
-	std::string command[10] = {"NICK", "USER", "WHOIS", "JOIN", "PART" , "MODE", "PING", "PRIVMSG", "TOPIC", "KICK"};
+	std::string command[11] = {"NICK", "USER", "WHOIS", "JOIN", "PART" , "MODE", "PING", "PRIVMSG", "TOPIC", "KICK", "OPER"};
 
 	std::map<int, User *>::iterator it = Users.find(clientSock);
-	int	(Command::*functptr[])(User*) = {&Command::nick, &Command::user, &Command::whois, &Command::join, &Command::part, &Command::mode,&Command::ping, &Command::privmsg, &Command::topic, &Command::kick};
+	int	(Command::*functptr[])(User*) = {&Command::nick, &Command::user, &Command::whois,
+		 &Command::join, &Command::part, &Command::mode,&Command::ping, &Command::privmsg,
+		 &Command::topic, &Command::kick, &Command::oper};
 
 	int	ret;
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 11; i++)
 	{
 		if (command[i] == _command)
 		{

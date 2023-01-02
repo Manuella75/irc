@@ -24,6 +24,7 @@ class Channel
 		std::string const & getTopic() const;
 		std::map<int, User *> const  & getUsers() const;
 		std::vector<int> const  & getBanni() const;
+		void addBanni(int i);
 		void	setTopic(std::string topic);
 		std::map<int, User *>  & getUsers();
 

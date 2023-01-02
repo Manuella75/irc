@@ -10,6 +10,7 @@
 User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
 {
 	_nickname = "";
+	oper = 0;
 }
 
 User::User(User const & cpy){

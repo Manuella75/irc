@@ -21,6 +21,7 @@ class	User
 	std::string _cmd;
 
 	public :
+		bool oper;
 		std::string realname;
 		/* Constructor */
 		User(std::string host, int socket);
