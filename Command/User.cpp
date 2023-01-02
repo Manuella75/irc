@@ -7,13 +7,11 @@
 	// return ;
 // }
 
-User::User (std::string host, int socket) : _socket(socket), _UserHosts(host)
+User::User (std::string host, int socket) : _socket(socket), _UserHosts(host), _connected(true), _lastPing(time(0))
 {
 	//_mode = "i";
 	_nickname = "";
 	_channel = "";
-	_connected = true;
-
 }
 
 User::User(User const & cpy){
@@ -44,11 +42,10 @@ void User::setCmd(std::string command)
 	this->_cmd = command;
 }
 
-// void User::setBuf(std::string buffer)
-// {
-// 
-	// std::cout << "The buffer received [ " << buffer << " ]." << std::endl;
-// }
+size_t	User::getLastPing(void) const
+{
+	return (time(0) - this->_lastPing);
+}
 
 std::string const & User::getUserHost() const
 {
@@ -80,6 +77,15 @@ std::string const  User::getUserChannel() const
 	return _channel;
 }
 
+bool	User::getConnected() const
+{
+	return _connected;
+}
+
+void 	User::resetPing()
+{
+	_lastPing = time(0);
+}
 void  User::setUserNick(std::string nick)
 {
 	_nickname = nick;

@@ -19,7 +19,7 @@ std::vector<std::string> split_splace1(std::vector<std::string>& v) {
  	 }
 	 return v;
 }
-void sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
+void Command::sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
   // Construisez le message de confirmation en suivant le format du protocole IRC
   std::string message = ": 001 "  + Username + " " + confirmationMessage + "\r\n";
 

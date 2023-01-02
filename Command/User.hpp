@@ -17,7 +17,7 @@ class	User
 	std::string 				_cmd;
 	int					_mode;
 	bool						_connected;
-	time_t						_lastConnect;
+	time_t						_lastPing;
 
 	public :
 		std::string  username;
@@ -43,6 +43,9 @@ class	User
 		void					setCmd(std::string command);
 
 		void					disconnect();
+		size_t					getLastPing() const;
+		bool					getConnected() const;
+		void 					resetPing();
 };
 
 #endif

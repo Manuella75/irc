@@ -33,6 +33,7 @@ class	Command
 		/* Constructor */
 		Command(std::string cmd, std::map<int, User*> Users, int clientSock, std::map<std::string, Channel *> Chan);
 		int	ft_exec_cmd(int clientSock);
+		static void sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username);
 		int	find_User_string(std::string target);
 		std::map<int, User *> set_Users();
 		std::map<std::string, Channel *> set_Chan();

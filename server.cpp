@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/31 06:17:19 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/03 00:09:26 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,21 +102,24 @@ void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add
 	std::cout << "------------------" << std::endl << std::endl;
 }
 
+
+
 int Server::waitConnection()
 {
 	int nb_event = 0;
-	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
+	time_t current_time = time(0);
+	
+    struct tm *time_info = localtime(&current_time);
+    std::string time_str = asctime(time_info);
+    time_str.erase(time_str.size() - 1);
+	std::cout << time_str << ": Server running ..." << std::endl;
+	// std::cout << "" << std::endl;
 	Server::sendPing();
 	nb_event = poll(&_pfds[0], _pfds.size(), 5000);  /* changer le timeout */
-	std::cout << "Poll result : " << nb_event << std::endl;
+	// std::cout << "Poll result : " << nb_event << std::endl;
 	if (nb_event == -1)
 	{
 		std::cout << "Poll failed " << std::endl;
-		return -1;
-	}
-	if (nb_event == 0)
-	{
-		std::cout << "Time out for socket" << std::endl; /* voir retour de ce cas */
 		return -1;
 	}
 
@@ -138,10 +141,11 @@ int Server::waitConnection()
 		}
 		else
 		{
-			if (Server::rcvFromClient(i, _pfds[i].fd) == -1)		// Cas du socket d'un client
+			if (Server::rcvFromClient(_pfds[i].fd) == -1)		// Cas du socket d'un client
 				return -1;
 		}
 	}
+	Server::deconnectUsers();
 	return 0;
 }
 
@@ -166,7 +170,7 @@ void	Server::setUserInfo(std::string buff, int fd)
 	vec.clear();
 }
 
-int Server::rcvFromClient(int pos, int fd)
+int Server::rcvFromClient(int fd)
 {
 	std::cout << std::endl << "4) Server receving data ..." << std::endl;
 	
@@ -177,17 +181,16 @@ int Server::rcvFromClient(int pos, int fd)
 	
 	memset(buf, 0, BUFFERSIZE + 1); 			
 	byteRcv = recv(fd, buf, BUFFERSIZE + 1, 0);							// Reception des strings
+	Server::getUser(fd)->resetPing();
 	if (byteRcv == -1)
 		return -1;
 	else if (byteRcv == 0)
 	{
-		std::cout << "5) The client disconnected" << std::endl;
-		_pfds.erase(_pfds.begin() + pos);
-		Users.erase(fd);
+		Users.find(fd)->second->disconnect();
+		// _pfds.erase(_pfds.begin() + pos);
+		// Users.erase(fd);
 		return 0;
 	}
-	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	// Server::getUser(fd)->setBuf(std::string(buf));
 	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
 	std::string str = buf;
 	size_t po = str.find("\r");
@@ -233,9 +236,32 @@ int Server::newClient()
 	return 0;
 }
 
-void Server::sendmsg(int newClient, std::string msg)
+void	Server::sendPing()
 {
-	send(newClient, msg.c_str(), msg.length(), 0); // * a revoir pour le non bloquant + flag + erreurs (msg.cstr + 1?) *
+	for (std::map<int, User*>::const_iterator it = Users.begin(); it != Users.end(); ++it)
+	{
+		if (it->second->getLastPing() >= 60)
+			Command::sendConfirmationMessage(it->second->getUserSocket(), "PING", it->second->getUserNick());
+	}
+}
+
+void	Server::deconnectUsers()
+{
+	int pos = 0;
+	for (std::map<int, User*>::const_iterator it = Users.begin(); it != Users.end(); ++it)
+	{
+		if (it->second->getConnected() == false || it->second->getLastPing() >= (60 + 5))
+		{
+			std::cout << "Client at socket " << it->first << " disconnected." << std::endl;
+			_pfds.erase(_pfds.begin() + pos);
+			pos++;
+			// quit(it->second, "QUIT :Client disconnected.");
+			// Users.erase(it);
+			it = Users.begin();
+			if (it == Users.end())
+				return ;
+		}
+	}
 }
 
 int Server::getPort() const

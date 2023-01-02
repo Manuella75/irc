@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/30 01:17:32 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/02 23:51:18 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,13 @@
 #include <iostream>
 #include "../Command/User.hpp"
 #include "../Command/Channel.hpp"
+#include "../Command/Command.hpp"
 
 #define BUFFERSIZE 512
 
 class Channel;
+class Command;
+
 class Server
 {
 
@@ -52,7 +55,6 @@ private:
     int                 _listenerSock;
     int                 _sock;    //
     // int                 _fdCount; // a changer par map des Users
-    // std::map<int,pollfd> _pfds;
     std::vector<pollfd> _pfds;
 
     // Class //
@@ -71,16 +73,16 @@ private:
     int newClient();
 
     // Receive data from Client //
-    int rcvFromClient(int pos, int fd);
+    int rcvFromClient(int fd);
+    
+    void sendPing();
 
+    void	deconnectUsers();
 public:
 
     // Construct/Destruct //
     Server(std::string port, std::string passwd);
     ~Server();
-
-    // Send message to client //
-    void        sendmsg(int clientSock, std::string msg);
 
     // Main loop //
     void        run();
@@ -91,8 +93,8 @@ public:
     User *      getUser(int fd) const;
 
     // Check functions //
-    bool valid_args(std::string input_port, std::string input_passwd);
-    bool hasPasswd() const;
+    bool    valid_args(std::string input_port, std::string input_passwd);
+    bool    hasPasswd() const;
 	void	setUserInfo(std::string buff, int fd);
 
     // Exceptions//

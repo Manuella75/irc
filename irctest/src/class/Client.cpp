@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smagdela <smagdela@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/12 13:38:05 by smagdela          #+#    #+#             */
-/*   Updated: 2022/11/10 14:19:22 by smagdela         ###   ########.fr       */
+/*   Updated: 2023/01/02 20:17:22 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Client::Client() : _fd(-1)
 {
 }
 
-Client::Client( const Client & src ) : _fd(-1)
+Client::Client(const Client &src) : _fd(-1)
 {
 	(void)src;
 }
@@ -50,17 +50,17 @@ Client::~Client()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Client &				Client::operator=( Client const & rhs )
+Client &Client::operator=(Client const &rhs)
 {
-	//if ( this != &rhs )
+	// if ( this != &rhs )
 	//{
-		//this->_value = rhs.getValue();
+	// this->_value = rhs.getValue();
 	//}
 	(void)rhs;
 	return *this;
 }
 
-std::ostream &			operator<<( std::ostream & o, Client const & i )
+std::ostream &operator<<(std::ostream &o, Client const &i)
 {
 	o << "Client at socket #" << i.getFd() << " has nickname: " << i.getNickname();
 	return o;
@@ -70,23 +70,23 @@ std::ostream &			operator<<( std::ostream & o, Client const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-void	Client::disconnect(void)
+void Client::disconnect(void)
 {
 	this->_connected = false;
 }
 
-void	Client::send_to(std::string msg_str) const
+void Client::send_to(std::string msg_str) const
 {
 	msg_str = getPrefix() + " " + msg_str;
 	my_send(this, msg_str);
 }
 
-void	Client::welcome(Server *serv) const
+void Client::welcome(Server *serv) const
 {
 	if (serv == NULL)
-		return ;
+		return;
 
-	std::string	str;
+	std::string str;
 
 	str = RPL_WELCOME;
 	str += " " + _nickname + " Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _hostname;
@@ -100,23 +100,23 @@ void	Client::welcome(Server *serv) const
 	str = RPL_MYINFO;
 	str += " " + _nickname + " " + serv->getConfig()->getServerName() + " " + serv->getConfig()->getServerVersion() + " Oowi *none*";
 	send_to(str);
-	Message	msg(serv->getUser(_fd), "MOTD");
+	Message msg(serv->getUser(_fd), "MOTD");
 	motd(serv, msg);
 }
 
-void	Client::resetTime(void)
+void Client::resetTime(void)
 {
 	_last_com = time(0);
 }
 
-size_t	Client::getLastcom(void) const
+size_t Client::getLastcom(void) const
 {
 	return (time(0) - this->_last_com);
 }
 
-std::string	Client::getPrefix(void) const
+std::string Client::getPrefix(void) const
 {
-	std::string	prefix = "";
+	std::string prefix = "";
 
 	if (_nickname.size())
 	{
@@ -138,7 +138,7 @@ void Client::addMode(char mode)
 	if (this->_mode.find(mode) == std::string::npos)
 		this->_mode += mode;
 	else
-		return ;
+		return;
 }
 
 void Client::rmMode(char mode)
@@ -146,14 +146,14 @@ void Client::rmMode(char mode)
 	if (this->_mode.find(mode) != std::string::npos)
 		this->_mode.erase(this->_mode.find(mode), 1);
 	else
-		return ;
+		return;
 }
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-sockfd					Client::getFd(void) const
+sockfd Client::getFd(void) const
 {
 	return this->_fd;
 }
@@ -173,17 +173,17 @@ std::string const &Client::getRealname(void) const
 	return this->_realname;
 }
 
-bool			Client::getAuthorize(void) const
+bool Client::getAuthorize(void) const
 {
 	return this->_authorize;
 }
 
-std::string const&	Client::getBuffer(void) const
+std::string const &Client::getBuffer(void) const
 {
 	return this->_buffer;
 }
 
-bool	Client::getConnected(void) const
+bool Client::getConnected(void) const
 {
 	return this->_connected;
 }
@@ -193,27 +193,27 @@ std::string const &Client::getMode(void) const
 	return this->_mode;
 }
 
-void			Client::setNickname(std::string new_nick)
+void Client::setNickname(std::string new_nick)
 {
 	this->_nickname = new_nick;
 }
 
-void			Client::setUsername(std::string new_nick)
+void Client::setUsername(std::string new_nick)
 {
 	this->_username = new_nick;
 }
 
-void	Client::setRealname(std::string new_nick)
+void Client::setRealname(std::string new_nick)
 {
 	this->_realname = new_nick;
 }
 
-void	Client::setBuffer(std::string new_buffer)
+void Client::setBuffer(std::string new_buffer)
 {
 	this->_buffer = new_buffer;
 }
 
-void	Client::setAuthorize(bool	authorization)
+void Client::setAuthorize(bool authorization)
 {
 	this->_authorize = authorization;
 }
