@@ -9,11 +9,9 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include "Utils.hpp"
 #include "Channel.hpp"
 
-void reply(unsigned short code, std::string arg1 = "", std::string arg2 = "", std::string arg3 = "", std::string arg4 = "", std::string arg5 = "", std::string arg6 = "", std::string arg7 = "");
 class Channel;
 class User;
 
@@ -49,6 +47,8 @@ class	Command
 		int privmsg_user(User *U, std::string msg);
 		int	kick(User *U);
 		void	send_message_chan(User *U, std::string message, Channel chan);
+		int setUser_name(User *U);
+		void	send_message(User *U, std::string message, std::string arg);
 		/* Destructor */
 		~Command(void);
 };

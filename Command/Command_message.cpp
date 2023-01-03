@@ -15,3 +15,28 @@ void	Command::send_message_chan(User *U, std::string message, Channel chan)
 		msg.clear();
 	}
 }
+
+void	Command::send_message(User *U, std::string message, std::string arg)
+{
+	std::string msg;
+
+	msg = ":" + U->getUserNick() + "!" + U->getUserHost() + "@localhost "
+	 + message + arg + "\r\n";
+	std::cout << "msg =" << msg << " socket = " << U->getUserSocket() << std::endl;
+	send(U->getUserSocket(), msg.c_str(), msg.length(), 0);
+}
+
+int	Command::setUser_name(User *U)
+{
+	std::map<int, User *>::iterator it;
+	for (it = Users.begin(); it != Users.end(); ++it)
+	{
+		if (arguments[0] == it->second->getUserNick())
+		{
+			arguments[0] += "1";
+			this->setUser_name(U);
+			return 0;
+		}
+	}
+	return 0;
+}

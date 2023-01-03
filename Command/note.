@@ -8,12 +8,10 @@
 _
 
 but a regler = 
-  - mag ou pas maj
-  -espace apres premier arg 
-  - Ton nick ne doit pas excéder 9 caractères (e
   -La commande /oper permet de t'authentificier au près du serveur 
   afin que ce dernier te donne le status de IRCOperator.
  - command invite a faire si channel mode = +i
  - command notice a faire 
  - command oper > idk admin > admin 
     > topic > mode > invite > kick
+

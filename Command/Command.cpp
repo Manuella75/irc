@@ -44,30 +44,31 @@ int	Command::find_User_string(std::string target)
 // 436: ERR_NICKCOLLISION: Nickname collision KILL from <nickname>@<hostname>
 // 437: ERR_UNAVAILRESOURCE: Nick/channel is temporarily unavailable
 // 482: ERR_CHANOPRIVSNEEDED: You're not channel operator
+//:redarnet_!redarnet@localhost 482 redarnet_ #leo :You're not channel operator
 
 int	Command::nick(User *U)
 {
 	std::cout << "COMMAND NICK" << std::endl;
 	// Vérifie qu'il y a bien un argument
 	if (arguments.empty()) {
-		reply(431);
+		U->reply(431);
 		return -1;
 	}
-	// verifie si le user est deja utilise
-	std::map<int, User *>::const_iterator it;
-  	for (it = Users.begin(); it != Users.end(); ++it)
+	for (size_t i = 0; i < arguments[0].size(); i++)
 	{
-		// std::cout << "USER = " << it->second->getUserNick() << std::endl;
-		if (arguments[0] == it->second->getUserNick())
-		{
-			arguments[0] += "1";
-			nick(U);
-			return (0);
-		}
+		char c = arguments[0][i];
+		if (c < '!' || c == '[' || c == ']' || c == '\\' || c == '`' || c == '_' || c == '<' || c =='>')
+			return -1;
 	}
+	if(U->getUserNick() == "")
+		return -1;
+	if(arguments[0].size() > 9)
+		return -1;
+	// verifie si le user est deja utilise
+	this->setUser_name(U);
+	std::string arg = " :" + arguments[0];
+	this->send_message(U, "NICK", arg);
 	U->setUserNick(arguments[0]);
-	std::string message =  "Your new Nick is " + U->getUserNick();
-	sendConfirmationMessage(U->getUserSocket(), message, U->getUserNick() );
 	return 0;
 }
 
@@ -75,11 +76,12 @@ int	Command::nick(User *U)
 /// ?USER <username> <hostname> <realname>
 int	Command::user(User  *U)
 {
+	std::string tmp = arguments[0];
 	std::cout << "COMMAND USER" << std::endl;
 	// error 461
 	if (arguments.empty())
 	{
-		reply(461);
+		U->reply(461);
 		return (-1);
 	}
 	// if (U->getUserNick().size() != 0)
@@ -88,18 +90,25 @@ int	Command::user(User  *U)
 	// 	return (-1);
 	// }
 	U->realname = "Remi Darnet";
-	// U->setUserNick(arguments[0]);
+	this->setUser_name(U);
+	U->setUserNick(arguments[0]);
 	U->setUserHost(arguments[1]);
-	 std::string message = ":localhost 127.0.0.1 " + U->getUserNick() +
+	 std::string message = ":localhost " + U->getUserNick() +
 	  " " + U->getUserNick() + " " + U->getUserNick() + " " + U->getUserHost() + " * :" + U->realname;
 	std::cout << " User message =" << message << std::endl;
+	if (tmp != arguments[0])
+	{
+		std::string msg = ":" + tmp + "!" + U->getUserHost() + "@localhost "
+		+ "NICK :" + arguments[0]  + "\r\n";
+		send(U->getUserSocket(), msg.c_str(), msg.length(), 0);
+	}
 	return (1);
 }
 
 int	Command::whois(User *U)
 {
 	std::cout << "COMMAND WHHOIS" << std::endl;
-	 std::string message = ":localhost 127.0.0.1 " + U->getUserNick() +
+	 std::string message = ":localhost " + U->getUserNick() +
 	  " " + U->getUserNick() + " " + U->getUserNick() + " " + U->getUserHost() + " * :" + U->realname;
 	std::cout << " Whois message =" << message << std::endl;
 	send(U->getUserSocket(),message.c_str(), message.size(), 0);
@@ -131,17 +140,14 @@ int Command::join(User *U)
 	//check si User est banni
 	std::vector<int>::const_iterator itbanni = it->second->getBanni().begin();
 	for (;itbanni != it->second->getBanni().end(); itbanni++)
-	{
-		if (*itbanni == U->getUserSocket())
-			break;
-	}
-	if (itbanni != it->second->getBanni().end())
-	{
-		std::string message = ":localhost 474 " + U->getUserNick() + " " + it->first + " :Cannot join channel (+b)";
-		std::cout <<"message = "<< message << std::endl;
-        send(U->getUserSocket(), message.c_str(), message.length(), 0);
-		return 0;
-	}
+		if (itbanni != it->second->getBanni().end())
+		{
+			U->reply(474, it->first);
+			// std::string message = ":localhost 474 " + U->getUserNick() + " " + it->first + " :Cannot join channel (+b)";
+			// std::cout <<"message = "<< message << std::endl;
+			// send(U->getUserSocket(), message.c_str(), message.length(), 0);
+			return 0;
+		}
 
 
 
@@ -185,7 +191,6 @@ int Command::part(User *U)
 	// si plus de Users delete le channel
 	if (it->second->getUsers().size() == 0)
 	{
-		std::cout << " here" << std::endl;
 		delete it->second;
 		Chan.erase(it);
 	}
@@ -198,34 +203,13 @@ int Command::mode(User *U)
 {
 	std::cout << "COMMAND MODE" << std::endl;
 	(void)U;
-	// int Use;
-
-	// // si le mode est pas ope ca sert a rien
-	// if (arguments[1] != "2")
-	// 	return -1;
-	// if (arguments.empty() && arguments.size() != 2)
-	// 	return -1;
-	// 	// si le user n est pas un ope ou n est pas dans un channel
-	// if (U->getUserMode() != 1)
-	// 	return -1;
-	// // on regarde si les 2 users sont dans le meme channel
-	// std::map<std::string, Channel *>::iterator it = Chan.find(U->getUserlastChannel());
-	// //on cherche le User et on le met ope
-	// Use = find_User_string(arguments[1]);
-	// std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(Use);
-	// if (itUser != it->second->getUsers().end())
-	// {
-	// 	itUser->second->setUserMode(2);
-	// 	return 0;
-	// }
 	return -1;
 }
 
 int Command::ping(User *U)
 {
 	std::cout << "COMMAND PING" << std::endl;
-	std::cout << " Ping =" << U->getUserSocket() << std::endl;
-	sendConfirmationMessage(U->getUserSocket(), "PONG", U->getUserNick());
+	this->send_message(U, "PONG", " :redarnet");
 	return 0;
 }
 
@@ -298,7 +282,11 @@ int	Command::kick(User *U)
 	itchann = U->getUserChannel().find(arguments[0]);
 	//check si le user est un modo
 	if (itchann->second == 0)
+	{
+
+		U->reply(482, it->first);
 		return -1;
+	}
 	std::map<int, User *>::iterator itUser = it->second->getUsers().begin();
 	for (;itUser != it->second->getUsers().end(); itUser++)
 	{
@@ -309,7 +297,7 @@ int	Command::kick(User *U)
 			if (itUser->second->getUserNick() == U->getUserNick())
 				return 0;
 			std::string	msg = ":" + U->getUserNick() + "!" + U->getUserHost() + "@localhost "
-		 + "KICK " + it->second->getName() + " " + itUser->second->getUserNick() +"\r\n";
+		 + "KICK " + it->second->getName() + " :" + itUser->second->getUserNick() +"\r\n";
 		 std::cout << "message = " << msg << std::endl;
 		send(itUser->second->getUserSocket(), msg.c_str(), msg.length(), 0);
 			//on ajoute le client dans un vec _banni
@@ -320,7 +308,7 @@ int	Command::kick(User *U)
 			ir->second->deleteUserlastChannel();
 			//on le delete du chann
 			delete itUser->second;
-			it->second->getUsers().erase(U->getUserSocket());
+			it->second->getUsers().erase(itUser->second->getUserSocket());
 			return (0);
 		}
 	}

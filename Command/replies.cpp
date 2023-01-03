@@ -1,6 +1,4 @@
-#ifndef REPLY_CPP
-#define REPLY_CPP
-#include "Command.hpp"
+#include "User.hpp"
 
 /******************************************************************************/
 /*                                   0**                                      */
@@ -451,10 +449,15 @@ std::string getReplies(unsigned short code, std::string arg1, std::string arg2, 
 	}
 }
 
-void reply(unsigned short code, std::string arg1 , std::string arg2 , std::string arg3 , std::string arg4 , std::string arg5 , std::string arg6 , std::string arg7 )
+void User::reply(unsigned short code, std::string arg1 , std::string arg2 , std::string arg3 , std::string arg4 , std::string arg5 , std::string arg6 , std::string arg7 )
 {
-	std::string msg =  getReplies(code, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-	send(4,msg.c_str(), msg.size(), 0);
+	std::ostringstream oss;
+	oss << code;
+	std::string msg = ":" + this->getUserNick() + "!" + this->getUserHost() + "@localhost"
+					+ " " + oss.str() + " " +this->getUserNick();
+	 msg +=  getReplies(code, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+	 msg += "\r\n";
+	std::cout << "error msg = " << msg << std::endl;
+	send(this->getUserSocket() ,msg.c_str(), msg.size(), 0);
 }
 
-#endif
