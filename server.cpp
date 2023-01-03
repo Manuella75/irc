@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/03 00:09:26 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/03 01:27:02 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_passwd = input_passwd;
 	this->_listenerSock = 0;
 	this->_sock = 0; // * utile? *
-	// this->_fdCount = 1;
 }
 
 Server::~Server() {}
@@ -247,20 +246,21 @@ void	Server::sendPing()
 
 void	Server::deconnectUsers()
 {
-	int pos = 0;
-	for (std::map<int, User*>::const_iterator it = Users.begin(); it != Users.end(); ++it)
+	for (std::map<int, User*>::iterator it = Users.begin(); it != Users.end();)
 	{
 		if (it->second->getConnected() == false || it->second->getLastPing() >= (60 + 5))
 		{
 			std::cout << "Client at socket " << it->first << " disconnected." << std::endl;
-			_pfds.erase(_pfds.begin() + pos);
-			pos++;
+			for (size_t i = 0; i < _pfds.size(); i++)
+			{
+				if (_pfds[i].fd == it->second->getUserSocket())
+					_pfds.erase(_pfds.begin() + i);
+			}
 			// quit(it->second, "QUIT :Client disconnected.");
-			// Users.erase(it);
-			it = Users.begin();
-			if (it == Users.end())
-				return ;
+			Users.erase(it++);
 		}
+		else
+			++it;
 	}
 }
 

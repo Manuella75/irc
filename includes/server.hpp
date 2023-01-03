@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/02 23:51:18 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/03 00:17:21 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,7 @@ private:
     int                 _port;
     std::string         _passwd;
     int                 _listenerSock;
-    int                 _sock;    //
-    // int                 _fdCount; // a changer par map des Users
+    int                 _sock;
     std::vector<pollfd> _pfds;
 
     // Class //
