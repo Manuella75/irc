@@ -23,15 +23,16 @@ class Channel
 		Channel & operator=(Channel const & rhs);
 
 
-		User*							getCreator() const;
-		User*							getAMember(std::string member) const;
-		std::string const & 			getName() const;
-		std::string const & 			getTopic() const;
-		std::map<int, User *> const& 	getUsers() const;
-		std::map<int, User *>  & 		getUsers();
+		User*								getCreator() const;
+		User*								getOneMember(std::string member) const;
+		std::map<int, User*> &				getAllMembers();
+		std::string	const &					getName() const;
+		std::string const & 				getTopic() const;
+		std::map<int, User *> const& 		getUsers() const;
+		std::map<int, User *>  & 			getUsers();
 
-		void							kickMember(User *member);
-		void							addMember(User *member);
+		void								kickMember(User *member);
+		void								addMember(User *member);
 
 };	
 #endif

@@ -29,7 +29,7 @@ Channel &Channel::operator=(Channel const & rhs)
 Channel::~Channel()
 {}
 
-User *Channel::getAMember(std::string member) const
+User *Channel::getOneMember(std::string member) const
 {
 	std::map<int, User*>::const_iterator	it;
 	
@@ -39,6 +39,11 @@ User *Channel::getAMember(std::string member) const
 			return it->second;
 	}
 	return NULL;
+}
+
+std::map<int, User*>&	Channel::getAllMembers(void)
+{
+ 	return (this->_Users);
 }
 
 void	Channel::kickMember(User *member)

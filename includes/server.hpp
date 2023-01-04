@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/03 00:17:21 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/04 19:43:17 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,17 @@
 #include <map>
 #include <vector>
 #include <poll.h>
-#include "../Command/Command.hpp"
 #include <utility>
 #include <iostream>
+ #include <signal.h>
+#include "../Command/Command.hpp"
 #include "../Command/User.hpp"
 #include "../Command/Channel.hpp"
 #include "../Command/Command.hpp"
 
 #define BUFFERSIZE 512
+
+extern bool is_running;
 
 class Channel;
 class Command;
@@ -58,7 +61,8 @@ private:
 
     // Class //
     std::map<int , User *> Users;
-	std::map<std::string, Channel *> Chan;
+	std::map<std::string, Channel *> Chans;
+    
     // Create a socket //
     int createSocket();
 
@@ -77,6 +81,7 @@ private:
     void sendPing();
 
     void	deconnectUsers();
+    
 public:
 
     // Construct/Destruct //
@@ -87,14 +92,17 @@ public:
     void        run();
 
     // Get functions //
-    int         getPort() const;
-    std::string getPasswd() const;
-    User *      getUser(int fd) const;
+    int                                     getPort() const;
+    std::string                             getPasswd() const;
+    User *                                  getUser(int fd) const;
+    std::map<std::string, Channel*>	const&  getChannel() const;
 
     // Check functions //
-    bool    valid_args(std::string input_port, std::string input_passwd);
-    bool    hasPasswd() const;
-	void	setUserInfo(std::string buff, int fd);
+    bool                                    valid_args(std::string input_port, std::string input_passwd);
+    bool                                    hasPasswd() const;
+	void	                                setUserInfo(std::string buff, int fd);
+    void	                                eraseChannel(Channel *chan);
+    void	                                removeEmptyChannel();
 
     // Exceptions//
     class NotValidArgsException : public std::exception

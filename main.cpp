@@ -6,14 +6,24 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/31 00:25:48 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/04 20:20:03 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
 
+bool is_running = true;
+
+static void sig_handler(int ok)
+{
+	(void)ok;
+	is_running = false;
+}
+
 int	main (int argc, char **argv)
 {
+	signal(SIGINT, sig_handler);
+	
 	if (argc != 3)
 	{
 		std::cerr << "Must be: \"./ircserv <port> <password>\"" << std::endl;
@@ -24,7 +34,6 @@ int	main (int argc, char **argv)
 		Server server(argv[1],argv[2]);
 		std::cout << "Port :" << server.getPort() << std::endl;
 		std::cout << "Passwd :" << server.getPasswd() << std::endl;
-		//std::cout << "hasPasswd :" << server.hasPasswd() << std::endl;
 		server.run();
     }
     catch(const std::exception& e)
@@ -77,3 +86,5 @@ int	main (int argc, char **argv)
 		
 		-
  */
+
+//check erase user + channel + signal delete tout

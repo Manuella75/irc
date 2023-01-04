@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/03 01:27:02 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/04 20:02:55 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,12 @@ void Server::run()
 {
 	if (Server::createSocket() == -1)                 // Creation du socket du serveur
 		throw SocketFailedException();
-	// Server::setEvent(_listenerSock, POLLIN);         // Ajout du sock serveur a la liste des fds
-	while (true)
+	while (is_running)
 	{
 		if (Server::waitConnection() == -1)
 			throw ClientConnectionFailedException();
+		Server::deconnectUsers();
+		Server::removeEmptyChannel();
 	}
 }
 
@@ -144,7 +145,6 @@ int Server::waitConnection()
 				return -1;
 		}
 	}
-	Server::deconnectUsers();
 	return 0;
 }
 
@@ -162,9 +162,9 @@ void	Server::setUserInfo(std::string buff, int fd)
 	std::vector<std::string>::iterator it = vec.begin();
 	for (; it != vec.end();it++)
 	{
-		Command cmd(*it, Users, fd, Chan);
+		Command cmd(*it, Users, fd, Chans);
 		Users =  cmd.set_Users();
-		Chan =  cmd.set_Chan();
+		Chans =  cmd.set_Chan();
 	}
 	vec.clear();
 }
@@ -202,9 +202,9 @@ int Server::rcvFromClient(int fd)
 		setUserInfo(str, fd);
 	else
 	{
-		Command cmd(str, Users, fd, Chan);
+		Command cmd(str, Users, fd, Chans);
 		Users =  cmd.set_Users();
-		Chan =  cmd.set_Chan();
+		Chans =  cmd.set_Chan();
 	}
 	return 0;
 }
@@ -264,6 +264,29 @@ void	Server::deconnectUsers()
 	}
 }
 
+void	Server::eraseChannel(Channel *chan)
+{
+	if (chan != NULL && Chans.find(chan->getName()) != Chans.end())
+	{
+		Chans.erase(Chans.find(chan->getName()));
+		delete chan;
+	}
+}
+
+void	Server::removeEmptyChannel()
+{
+	for (std::map<std::string, Channel *>::const_iterator it = getChannel().begin(); it != getChannel().end(); ++it)
+	{
+		if (it->second->getAllMembers().size() <= 0)
+		{
+			Server::eraseChannel(it->second);
+			it = Server::getChannel().begin();
+			if (it == Server::getChannel().end())
+				return ;
+		}
+	}
+} 
+
 int Server::getPort() const
 {
 	return (this->_port);
@@ -304,6 +327,11 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 	return false;
 }
 
+std::map<std::string, Channel*>const & Server::getChannel() const 
+{
+	return Chans;
+}
+
 const char *Server::NotValidArgsException::what() const throw()
 {
 	return "Argument aren't valid";
@@ -318,3 +346,5 @@ const char *Server::ClientConnectionFailedException::what() const throw()
 {
 	return "Client connection Failed";
 }
+
+
