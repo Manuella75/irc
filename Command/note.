@@ -1,10 +1,5 @@
-> test arg User  + fix (mode , channel) user ne peux pas etre dans plusieurs chanel
-> cmd User
-> mode avec juste super user et user classic
-  > kick
 > changer les msg pour que ce soit clean
 > list pour voir les chann dispo 
-> cmd topic finir 
 _
 
 but a regler = 
@@ -14,4 +9,10 @@ but a regler =
  - command notice a faire 
  - command oper > idk admin > admin 
     > topic > mode > invite > kick
+    // > leaks  
+    // cpy user > channel et user > serveur/cmd
+    //bug avec kick / modo etc 
 
+//msg prive 
+:leo!redarnet@localhost PRIVMSG theo :wrrw wrrw wrwr wr
+:theo!redarnet@localhost 324 theo #le +n 

@@ -14,7 +14,7 @@ class	User
 	std::string	_nickname;
 	std::string	_UserHosts;
 	int _socket;
-	// std::string _channel;
+	//map avec bool 1 pour op du premier qui rejoin le channel
 	std::map<std::string, bool> _channel;
 	//vecteur >  delete  juste delete le chann ou on est
 	//join check si ca existe si ca existe delete et met le a la fin sinon insrt
@@ -37,6 +37,7 @@ class	User
 		void	setCmd(std::string command);
 		std::map<std::string, bool>			const getUserChannel() const;
 		std::string			const getUserlastChannel() const;
+		int			getUserlastChannelOpe() const;
 		int					getUserSocket() const;
 		void	deleteUserlastChannel();
 		void reply(unsigned short code, std::string arg1 = "", std::string arg2 = "", std::string arg3 = "", std::string arg4 = "", std::string arg5 = "", std::string arg6 = "", std::string arg7 = "");

@@ -452,9 +452,15 @@ std::string getReplies(unsigned short code, std::string arg1, std::string arg2, 
 void User::reply(unsigned short code, std::string arg1 , std::string arg2 , std::string arg3 , std::string arg4 , std::string arg5 , std::string arg6 , std::string arg7 )
 {
 	std::ostringstream oss;
+	std::string channel;
 	oss << code;
+	if (this->_channel.size() > 0)
+		channel += " " + this->getUserlastChannel();
+
+
+
 	std::string msg = ":" + this->getUserNick() + "!" + this->getUserHost() + "@localhost"
-					+ " " + oss.str() + " " +this->getUserNick();
+					+ " " + oss.str() + " " +this->getUserNick() + channel;
 	 msg +=  getReplies(code, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 	 msg += "\r\n";
 	std::cout << "error msg = " << msg << std::endl;

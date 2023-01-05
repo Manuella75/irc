@@ -49,6 +49,8 @@ class	Command
 		void	send_message_chan(User *U, std::string message, Channel chan);
 		int setUser_name(User *U);
 		void	send_message(User *U, std::string message, std::string arg);
+		int	nicknameisue();
+		int	check_operator(User *U);
 		/* Destructor */
 		~Command(void);
 };

@@ -40,3 +40,24 @@ int	Command::setUser_name(User *U)
 	}
 	return 0;
 }
+
+int	Command::nicknameisue()
+{
+	std::map<int, User *>::iterator it;
+	for (it = Users.begin(); it != Users.end(); ++it)
+	{
+		if (arguments[0] == it->second->getUserNick())
+			return -1;
+	}
+	return 0;
+}
+
+int	Command::check_operator(User *U)
+{
+	if (U->getUserlastChannelOpe() == 1)
+		return 1;
+	if (U->oper == 1)
+		return 1;
+
+	return 0;
+}

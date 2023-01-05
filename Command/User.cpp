@@ -63,6 +63,12 @@ std::string const  User::getUserlastChannel() const
 	return it->first;
 }
 
+int   User::getUserlastChannelOpe() const
+{
+	std::map<std::string, bool>::const_iterator it = _channel.end();
+	it--;
+	return it->second;
+}
 void  User::setUserNick(std::string nick)
 {
 	_nickname = nick;
@@ -73,6 +79,13 @@ void  User::setUserHost(std::string host)
 }
 void  User::setUserChannel(std::string chann, bool bo)
 {
+	// need to check si le channel existe
+	std::map<std::string, bool>::iterator it = _channel.begin();
+	for (; it != _channel.end(); it++)
+	{
+		if (it->first == chann)
+			_channel.erase(it);
+	}
 	_channel.insert(std::pair<std::string, bool>(chann, bo));
 	// _channel = chann;
 }
