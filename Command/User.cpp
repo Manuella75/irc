@@ -7,10 +7,12 @@
 	// return ;
 // }
 
-User::User (std::string host, int socket) : _UserHosts(host), _socket(socket)
+User::User (std::string host, int socket) : _socket(socket), _UserHosts(host), _connected(true), _lastPing(time(0))
 {
-	_nickname = "";
+	//_mode = "i";
 	oper = 0;
+	_nickname = "";
+	_channel = "";
 }
 
 User::User(User const & cpy){
@@ -30,9 +32,19 @@ User & User::operator=(User const & rhs)
 	return *this;
 }
 
+void	User::disconnect(void)
+{
+	this->_connected = false;
+}
+
 void User::setCmd(std::string command)
 {
 	this->_cmd = command;
+}
+
+size_t	User::getLastPing(void) const
+{
+	return (time(0) - this->_lastPing);
 }
 
 std::string const & User::getUserHost() const
@@ -97,7 +109,39 @@ void User::deleteUserlastChannel()
 	;
 	it--;
 	_channel.erase(it);
+int  User::getUserMode() const
+{
+	return _mode;
 }
+
+void  User::setUserMode(int mode)
+{
+	_mode = mode;
+}
+
+// std::string const  User::getUserChannel() const
+// {
+// 	return _channel;
+// }
+
+bool	User::getConnected() const
+{
+	return _connected;
+}
+
+void 	User::resetPing()
+{
+	_lastPing = time(0);
+}
+void  User::setUserNick(std::string nick)
+{
+	_nickname = nick;
+}
+
+// void  User::setUserChannel(std::string chann)
+// {
+// 	_channel = chann;
+// }
 
 User::~User(void)
 {

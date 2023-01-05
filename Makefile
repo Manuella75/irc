@@ -6,7 +6,11 @@
 #    By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/10/19 16:53:48 by mettien           #+#    #+#              #
+<<<<<<< HEAD
 #    Updated: 2023/01/05 03:29:43 by redarnet         ###   ########.fr        #
+=======
+#    Updated: 2022/12/20 17:53:41 by redarnet         ###   ########.fr        #
+>>>>>>> master
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +20,10 @@ SRCS =	main.cpp\
 		server.cpp\
 		Command/User.cpp\
 		Command/Command.cpp\
+<<<<<<< HEAD
 		Command/Command_utils.cpp\
+=======
+>>>>>>> master
 		Command/replies.cpp\
 		Command/Channel.cpp
 OBJS = $(addprefix objs/, $(SRCS:.cpp=.o))

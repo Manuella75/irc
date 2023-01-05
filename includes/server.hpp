@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/28 03:07:20 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/06 00:21:56 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,16 +32,21 @@
 #include <map>
 #include <vector>
 #include <poll.h>
-#include "../Command/Command.hpp"
 #include <utility>
 #include <iostream>
+ #include <signal.h>
+#include "../Command/Command.hpp"
 #include "../Command/User.hpp"
 #include "../Command/Channel.hpp"
+#include "../Command/Command.hpp"
 
-// class Command;
-// class User;
+#define BUFFERSIZE 512
+
+extern bool is_running;
 
 class Channel;
+class Command;
+
 class Server
 {
 
@@ -51,19 +56,18 @@ private:
     int                 _port;
     std::string         _passwd;
     int                 _listenerSock;
-    int                 _sock;    //
-    int                 _fdCount; // a changer par map des Users
-    // std::map<int,pollfd> _pfds;
+    int                 _sock;
     std::vector<pollfd> _pfds;
 
     // Class //
     std::map<int , User *> Users;
-	std::map<std::string, Channel *> Chan;
+	std::map<std::string, Channel *> Chans;
+
     // Create a socket //
     int createSocket();
 
     // Set up fd //
-    void add_fd_ToList(int sock, int event, int isServer); // add a fd to the map
+    void add_fd(int sock, int event, int isServer); // add a fd to the map
 
     // Wait for a connection //
     int waitConnection();
@@ -72,7 +76,11 @@ private:
     int newClient();
 
     // Receive data from Client //
-    int rcvFromClient(int pos, int fd);
+    int rcvFromClient(int fd);
+
+    void sendPing();
+
+    void	deconnectUsers();
 
 public:
 
@@ -80,20 +88,21 @@ public:
     Server(std::string port, std::string passwd);
     ~Server();
 
-    // Send message to client //
-    void        sendmsg(int clientSock, std::string msg);
-
     // Main loop //
     void        run();
 
     // Get functions //
-    int         getPort() const;
-    std::string getPasswd() const;
+    int                                     getPort() const;
+    std::string                             getPasswd() const;
+    User *                                  getUser(int fd) const;
+    std::map<std::string, Channel*>	const&  getChannel() const;
 
     // Check functions //
-    bool valid_args(std::string input_port, std::string input_passwd);
-    bool hasPasswd() const;
-	void	setUserInfo(std::string buff, int fd);
+    bool                                    valid_args(std::string input_port, std::string input_passwd);
+    bool                                    hasPasswd() const;
+	void	                                setUserInfo(std::string buff, int fd);
+    void	                                eraseChannel(Channel *chan);
+    void	                                removeEmptyChannel();
 
     // Exceptions//
     class NotValidArgsException : public std::exception

@@ -24,25 +24,46 @@ class	User
 	public :
 		bool oper;
 		std::string realname;
+	int					_mode;
+	bool						_connected;
+	time_t						_lastPing;
+
+	public :
+		std::string  username;
+		std::string realname;
+
 		/* Constructor */
 		User(std::string host, int socket);
 		User(User const & cpy);
 		User(User  * cpy);
 		User &operator=(User const & rhs);
-		std::string const & getUserHost() const;
-		std::string		const	getUserNick() const;
-		void				setUserNick(std::string Nick);
 		void				setUserHost(std::string host);
 		void				setUserChannel(std::string chann, bool bo);
-		void	setCmd(std::string command);
 		std::map<std::string, bool>			const getUserChannel() const;
 		std::string			const getUserlastChannel() const;
 		int			getUserlastChannelOpe() const;
-		int					getUserSocket() const;
 		void	deleteUserlastChannel();
 		void reply(unsigned short code, std::string arg1 = "", std::string arg2 = "", std::string arg3 = "", std::string arg4 = "", std::string arg5 = "", std::string arg6 = "", std::string arg7 = "");
 		/* Destructor */
 		~User(void);
+		/* Destructor */
+		~User(void);
+
+		std::string const & 	getUserHost() const;
+		std::string	const		getUserNick() const;
+		int						getUserMode() const ;
+		// std::string	const 		getUserChannel() const;
+		int						getUserSocket() const;
+
+		void					setUserMode(int mode);
+		void					setUserNick(std::string Nick);
+		// void					setUserChannel(std::string chann);
+		void					setCmd(std::string command);
+
+		void					disconnect();
+		size_t					getLastPing() const;
+		bool					getConnected() const;
+		void 					resetPing();
 };
 
 #endif
