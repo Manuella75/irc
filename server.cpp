@@ -6,12 +6,11 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2022/12/23 22:37:53 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/04 20:02:55 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
-
 Server::Server(std::string input_port, std::string input_passwd)
 {
 	if (valid_args(input_port, input_passwd) == false)
@@ -20,7 +19,6 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_passwd = input_passwd;
 	this->_listenerSock = 0;
 	this->_sock = 0; // * utile? *
-	this->_fdCount = 1;
 }
 
 Server::~Server() {}
@@ -29,11 +27,12 @@ void Server::run()
 {
 	if (Server::createSocket() == -1)                 // Creation du socket du serveur
 		throw SocketFailedException();
-	// Server::setEvent(_listenerSock, POLLIN);         // Ajout du sock serveur a la liste des fds
-	while (true)
+	while (is_running)
 	{
 		if (Server::waitConnection() == -1)
 			throw ClientConnectionFailedException();
+		Server::deconnectUsers();
+		Server::removeEmptyChannel();
 	}
 }
 
@@ -41,8 +40,11 @@ int Server::createSocket()
 {
 	///////  Creation du socket  ////////
 
+	int val = 1;
 	_listenerSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listenerSock == -1)
+		return -1;
+	if (setsockopt(_listenerSock, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &val, sizeof(val)) < 0)
 		return -1;
 	if(fcntl(_listenerSock, F_SETFL, O_NONBLOCK) < 0) 	// set le socket en mode non bloquant
 		return -1;
@@ -68,73 +70,63 @@ int Server::createSocket()
 
 	if (listen(_listenerSock, SOMAXCONN) < 0) /* check max listened sockets */
 		return -1;
-	Server::add_fd_ToList(_listenerSock, POLLIN, 1);
+	Server::add_fd(_listenerSock, POLLIN, 1);
 	return 0;
 }
 
-void Server::add_fd_ToList(int sock, int event, int isServer) /* changer le nom par add user/fd */
+void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add user/fd */
 {
 	/////   Set up des evenements du fd   /////
 	
-	// pollfd  pfd;
-	// pfd.fd = sock;
-	// pfd.events = event;
-	if (isServer)
-		_fdCount = 0;
-	std::cout << _fdCount << std::endl;
-	// _pfds.insert(std::pair<int, pollfd>(_fdCount, pfd));
+	if (!isServer)
+	{
+		User *new_user =  new User("hello",sock);
+		if (Users.count(sock) > 0)						// check si Users deja existant
+			return;
+		Users.insert(std::pair<int, User *>(sock, new_user));
+		// std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
+		// send(sock, response.c_str(), response.size(), 0);
+	}
 	_pfds.push_back(pollfd());
 	_pfds.back().fd = sock;
 	_pfds.back().events = event;
 	_pfds.back().revents = 0;
-	std::cout << "New fd = " << sock << " with event = " << _pfds[_fdCount].events << std::endl;
-	std::cout << "----- FD MAP -----" << std::endl;
+	std::cout << std::endl << "New Client on socket #" << sock << "." << std::endl;
+	std::cout << "-----------------" << std::endl;
 	std::vector<pollfd> :: iterator it;
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
+	
 	{
 	    std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
 	std::cout << "------------------" << std::endl << std::endl;
-	if (!isServer)
-	{
-		User *U =  new User("hello");
-		Users.insert(std::pair<int, User *>(sock, U));
-		std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
-		send(sock, response.c_str(), response.size(), 0);
-	}
-	_fdCount++;
-	std::cout << _fdCount << std::endl;	
 }
+
+
 
 int Server::waitConnection()
 {
 	int nb_event = 0;
-	std::cout << std::endl<< "3) -----------   Server waiting for some event ... --------------" << std::endl;
-	_pfds[0].revents = 0;
-	for (int i = 0; i < _fdCount; i++)
-	{
-		std::cout << "Pos: " << i << " ------ " << _pfds[i].revents << std::endl;
-	}
-	nb_event = poll(&_pfds[0], _fdCount, -1);  /* changer le timeout */
-	std::cout << "Poll result : " << nb_event << std::endl;
-	// std::cout << "Fd revent : " << _pfds[0].revents << std::endl;
+	time_t current_time = time(0);
+	
+    struct tm *time_info = localtime(&current_time);
+    std::string time_str = asctime(time_info);
+    time_str.erase(time_str.size() - 1);
+	std::cout << time_str << ": Server running ..." << std::endl;
+	// std::cout << "" << std::endl;
+	Server::sendPing();
+	nb_event = poll(&_pfds[0], _pfds.size(), 5000);  /* changer le timeout */
+	// std::cout << "Poll result : " << nb_event << std::endl;
 	if (nb_event == -1)
 	{
 		std::cout << "Poll failed " << std::endl;
 		return -1;
 	}
-	if (nb_event == 0)
-	{
-		std::cout << "Time out for socket" << std::endl; /* voir retour de ce cas */
-		return -1;
-	}
 
 	/////  Boucle d'attente de connexions entrantes ou existantes   ///////
-	// std::cout << _fdCount << "|" << current_size << std::endl;
-	int currentSize = _fdCount;
+	int currentSize = _pfds.size();
 	for (int i = 0; i < currentSize; i++)
 	{
-		// std::cout << _fdCount << "|" << currentSize << std::endl;
 		if (_pfds[i].revents == 0) 								// Ce socket n'a pas fait d'appel
 			continue;
 		if (_pfds[i].revents != POLLIN)
@@ -142,41 +134,78 @@ int Server::waitConnection()
 			std::cout << "Error! Revent: " << _pfds[i].revents << " on index " << i << std::endl;
 			return -1;
 		}
-		if (_pfds[i].fd == _listenerSock) 			
+		if (_pfds[i].fd == _listenerSock)
 		{
 			if (Server::newClient() == -1)						// Cas du socket du serveur
 				return -1;
 		}
-		else 										
+		else
 		{
-			if (Server::rcvFromClient(i, _pfds[i].fd) == -1)		// Cas du socket d'un client
+			if (Server::rcvFromClient(_pfds[i].fd) == -1)		// Cas du socket d'un client
 				return -1;
 		}
 	}
 	return 0;
 }
 
-int Server::rcvFromClient(int pos, int fd)
+void	Server::setUserInfo(std::string buff, int fd)
+{
+	buff.erase(buff.size() -1);
+	std::vector<std::string> vec;
+	std::istringstream ss(buff);
+    std::string string;
+
+    while (std::getline(ss, string, '\n'))
+    {
+        vec.push_back(string );
+    }
+	std::vector<std::string>::iterator it = vec.begin();
+	for (; it != vec.end();it++)
+	{
+		Command cmd(*it, Users, fd, Chans);
+		Users =  cmd.set_Users();
+		Chans =  cmd.set_Chan();
+	}
+	vec.clear();
+}
+
+int Server::rcvFromClient(int fd)
 {
 	std::cout << std::endl << "4) Server receving data ..." << std::endl;
 	
-	char buf[4096];								/* size adequate? */
+	char buf[BUFFERSIZE + 1];								/* size adequate? */
+	ssize_t byteRcv;
 	
 	/////  Reception de toutes les donnees sur le socket client   /////
 	
-	memset(buf, 0, 4096); 			
-	int byteRcv = recv(fd, buf, 4096, 0);							// Reception des strings
+	memset(buf, 0, BUFFERSIZE + 1); 			
+	byteRcv = recv(fd, buf, BUFFERSIZE + 1, 0);							// Reception des strings
+	Server::getUser(fd)->resetPing();
 	if (byteRcv == -1)
 		return -1;
 	else if (byteRcv == 0)
 	{
-		std::cout << "5) The client disconnected" << std::endl;
-		_pfds.erase(_pfds.begin() + pos);
-		_fdCount--;
+		Users.find(fd)->second->disconnect();
+		// _pfds.erase(_pfds.begin() + pos);
+		// Users.erase(fd);
 		return 0;
 	}
-	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
-	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
+	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
+	std::string str = buf;
+	size_t po = str.find("\r");
+    while (po != std::string::npos) {
+        str.erase(po, 1);
+        po = str.find("\r");
+    }
+	std::map<int, User *>::iterator it = Users.find(fd);
+	if (it->second->getUserNick() == "")
+		setUserInfo(str, fd);
+	else
+	{
+		Command cmd(str, Users, fd, Chans);
+		Users =  cmd.set_Users();
+		Chans =  cmd.set_Chan();
+	}
 	return 0;
 }
 
@@ -185,14 +214,14 @@ int Server::newClient()
 	int newClient = 0;
 
 	///// Accepte les requetes de connexion entrante /////
-	
+
 	std::cout << std::endl << "4) Server waiting for the client ..." << std::endl;
 	do
 	{
 		newClient = accept(_listenerSock, NULL, NULL); 		// Creation du socket d'ecoute client
 		// if (fcntl(newClient, F_SETFL, O_NONBLOCK) < 0) 		// set le socket en mode non bloquant
 			// return -1;
-		std::cout << "Accept() = "<< newClient << std::endl;
+		// std::cout << "Accept() = "<< newClient << std::endl;
 		if (newClient < 0)
 		{
 			if (errno != EWOULDBLOCK)
@@ -200,16 +229,63 @@ int Server::newClient()
 			// std::cout << errno << " - " << strerror(errno) << std::endl;
 			break;
 		}
-		std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
-		Server::add_fd_ToList(newClient, POLLIN, 0);
-	} while (newClient != -1); // * condition a revoir * //
+	std::cout << std::endl << "5) Server accepting one connection ..." << std::endl;
+	Server::add_fd(newClient, POLLIN, 0);
+	} while (newClient != -1);
 	return 0;
 }
 
-void Server::sendmsg(int newClient, std::string msg)
+void	Server::sendPing()
 {
-	send(newClient, msg.c_str(), msg.length(), 0); // * a revoir pour le non bloquant + flag + erreurs (msg.cstr + 1?) *
+	for (std::map<int, User*>::const_iterator it = Users.begin(); it != Users.end(); ++it)
+	{
+		if (it->second->getLastPing() >= 60)
+			Command::sendConfirmationMessage(it->second->getUserSocket(), "PING", it->second->getUserNick());
+	}
 }
+
+void	Server::deconnectUsers()
+{
+	for (std::map<int, User*>::iterator it = Users.begin(); it != Users.end();)
+	{
+		if (it->second->getConnected() == false || it->second->getLastPing() >= (60 + 5))
+		{
+			std::cout << "Client at socket " << it->first << " disconnected." << std::endl;
+			for (size_t i = 0; i < _pfds.size(); i++)
+			{
+				if (_pfds[i].fd == it->second->getUserSocket())
+					_pfds.erase(_pfds.begin() + i);
+			}
+			// quit(it->second, "QUIT :Client disconnected.");
+			Users.erase(it++);
+		}
+		else
+			++it;
+	}
+}
+
+void	Server::eraseChannel(Channel *chan)
+{
+	if (chan != NULL && Chans.find(chan->getName()) != Chans.end())
+	{
+		Chans.erase(Chans.find(chan->getName()));
+		delete chan;
+	}
+}
+
+void	Server::removeEmptyChannel()
+{
+	for (std::map<std::string, Channel *>::const_iterator it = getChannel().begin(); it != getChannel().end(); ++it)
+	{
+		if (it->second->getAllMembers().size() <= 0)
+		{
+			Server::eraseChannel(it->second);
+			it = Server::getChannel().begin();
+			if (it == Server::getChannel().end())
+				return ;
+		}
+	}
+} 
 
 int Server::getPort() const
 {
@@ -219,6 +295,16 @@ int Server::getPort() const
 std::string Server::getPasswd() const
 {
 	return (this->_passwd);
+}
+
+User *Server::getUser(int fd) const
+{
+	std::map<int, User*>::const_iterator	it;
+
+	it = Users.find(fd);
+	if (it == Users.end())
+		return NULL;
+	return it->second;
 }
 
 bool Server::hasPasswd() const
@@ -238,8 +324,12 @@ bool Server::valid_args(std::string input_port, std::string input_passwd)
 			return false;
 		return true;
 	}
-	// check des criteres de password ?? Idk
 	return false;
+}
+
+std::map<std::string, Channel*>const & Server::getChannel() const 
+{
+	return Chans;
 }
 
 const char *Server::NotValidArgsException::what() const throw()
@@ -256,3 +346,5 @@ const char *Server::ClientConnectionFailedException::what() const throw()
 {
 	return "Client connection Failed";
 }
+
+

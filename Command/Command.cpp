@@ -1,109 +1,304 @@
 #include "Command.hpp"
+std::vector<std::string> split_splace1(std::vector<std::string>& v) {
+  std::vector<std::string>::iterator it;
+  for (it = v.begin(); it != v.end(); ++it) {
+	std::string &str = *it;
+		size_t pos = str.find(" ");
+        // Enlever tous les espaces de la chaîne
+        while (pos != std::string::npos) {
+            str.erase(pos, 1);
+            pos = str.find(" ");
+        }
+        // // Trouver l'index des retours à la ligne dans la chaîne
+        pos = str.find("\n");
+        // Enlever tous les retours à la ligne de la chaîne
+        while (pos != std::string::npos) {
+            str.erase(pos, 1);
+            pos = str.find("\n");
+        }
+ 	 }
+	 return v;
+}
+void Command::sendConfirmationMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
+  // Construisez le message de confirmation en suivant le format du protocole IRC
+  std::string message = ": 001 "  + Username + " " + confirmationMessage + "\r\n";
 
-int	admin(void){return (0);}
-int	akill(void){return (0);}
-int	away(void){return (0);}
-int	cleandead(void){return (0);}
-int	clearakills(void){return (0);}
-int	connect(void){return (0);}
-int	die(void){return (0);}
-int	expban(void){return (0);}
-int	globops(void){return (0);}
-int	help(void){return (0);}
-int	importmotd(void){return (0);}
-int	info(void){return (0);}
-int	invite(void){return (0);}
-int	isbanned(void){return (0);}
-int	ison(void){return (0);}
-int	join(void){return (0);}
-int	kick(void){return (0);}
-int	kill(void){return (0);}
-int	killban(void){return (0);}
-int	kline(void){return (0);}
-int	links(void){return (0);}
-int	list(void){return (0);}
-int	lusers(void){return (0);}
-int	me(void){return (0);}
-int	mode(void){return (0);}
-int	motd(void){return (0);}
-int	msg(void){return (0);}
-int	names(void){return (0);}
-int	nick(void){return (0);}
-int	notice(void){return (0);}
-int	oper(void){return (0);}
-int	part(void){return (0);}
-int	pass(void){return (0);}
-int	privmsg(void){return (0);}
-int	query(void){return (0);}
-int	quit(void){return (0);}
-int	rakill(void){return (0);}
-int	rehash(void){return (0);}
-int	shun(void){return (0);}
-int	silence(void){return (0);}
-int	squit(void){return (0);}
-int	stats(void){return (0);}
-int	summon(void){return (0);}
-int	time(void){return (0);}
-int	topic(void){return (0);}
-int	unban(void){return (0);}
-int	unkline(void){return (0);}
-int	userhost(void){return (0);}
-int	users(void){return (0);}
-int	version(void){return (0);}
-int	wall(void){return (0);}
-int	wallops(void){return (0);}
-int	who(void){return (0);}
-int	whois(void){return (0);}
-int	whowas(void){return (0);}
-
-int	ft_exec_cmd(std::string cmd)
+  // Envoyez le message au client en utilisant la fonction send()
+  send(clientSocket, message.c_str(), message.length(), 0);
+}
+int	Command::find_User_string(std::string target)
 {
-	std::string command[55] = {"ADMIN", "AKILL", "AWAY", "CLEANDEAD", "CLEARAKILLS", "CONNECT", "DIE", "EXPBAN", "GLOBOPS", "HELP", "IMPORTMOTD", "INFO", "INVITE", "ISBANNED", "ISON", "JOIN", "KICK", "KILL", "KILLBAN", "KLINE", "LINKS", "LIST", "LUSERS", "ME", "MODE", "MOTD", "MSG", "NAMES", "NICK", "NOTICE", "OPER", "PART", "PASS", "PRIVMSG", "QUERY", "QUIT", "RAKILL", "REHASH", "SHUN", "SILENCE", "SQUIT", "STATS", "SUMMON", "TIME", "TOPIC", "UNBAN", "UNKLINE", "USERHOST", "USERS", "VERSION", "WALL", "WALLOPS", "WHO", "WHOIS", "WHOWAS"};
+	std::map<int, User *>::iterator it = Users.begin();
+	for (; it != Users.end(); it++)
+	{
+		if (it->second->getUserNick() == target)
+			return it->first;
+	}
+	return -1;
+}
 
-	int	(*functptr[])() = {&admin, &akill, &away, &cleandead, &clearakills, &connect, &die, &expban, &globops, &help, &importmotd, &info, &invite, &isbanned, &ison, &join, &kick, &kill, &killban, &kline, &links, &list, &lusers, &me, &mode, &motd, &msg, &names, &nick, &notice, &oper, &part, &pass, &privmsg, &query, &quit, &rakill, &rehash, &shun, &silence, &squit, &stats, &summon, &time, &topic, &unban, &unkline, &userhost, &users, &version, &wall, &wallops, &who, &whois, &whowas};
+// 431: ERR_NONICKNAMEGIVEN: No nickname given
+// 432: ERR_ERRONEUSNICKNAME: Erroneous nickname
+// 433: ERR_NICKNAMEINUSE: Nickname is already in use
+// 436: ERR_NICKCOLLISION: Nickname collision KILL from <nickname>@<hostname>
+// 437: ERR_UNAVAILRESOURCE: Nick/channel is temporarily unavailable
+// 482: ERR_CHANOPRIVSNEEDED: You're not channel operator
+
+int	Command::nick(User *U)
+{
+	std::cout << "COMMAND NICK" << std::endl;
+	// Vérifie qu'il y a bien un argument
+	if (arguments.empty()) {
+		reply(431);
+		return -1;
+	}
+	// verifie si le user est deja utilise
+	std::map<int, User *>::const_iterator it;
+  	for (it = Users.begin(); it != Users.end(); ++it)
+	{
+		// std::cout << "USER = " << it->second->getUserNick() << std::endl;
+		if (arguments[0] == it->second->getUserNick())
+		{
+			arguments[0] += "1";
+			nick(U);
+			return (0);
+		}
+	}
+	U->setUserNick(arguments[0]);
+	std::cout << "New Nick is " << U->getUserNick() << std::endl;
+	sendConfirmationMessage(U->getUserSocket(), "new NICK", U->getUserNick() );
+	return 0;
+}
+
+//USER <username> <mode> <unused> <realname>
+/// ?USER <username> <hostname> <realname>
+int	Command::user(User  *U)
+{
+	std::cout << "COMMAND USER" << std::endl;
+	// error 461
+	if (arguments.empty())
+	{
+		reply(461);
+		return (-1);
+	}
+	if (U->username.size() != 0)
+	{
+		reply(462);
+		return (-1);
+	}
+	U->username = arguments[0];
+	U->setUserMode(atoi(arguments[1].c_str()));
+	U->realname = arguments[2];
+	return (1);
+}
+
+int	Command::whois(User *U)
+{
+	std::cout << "COMMAND WHHOIS" << std::endl;
+	// a voir pour l envoie au client
+	std::cout << U->getUserNick() << std::endl;
+	 std::string reponse = ":" + U->username +
+	 " utilisateur utilisateur * :Nom réel\r\n";
+	send(U->getUserSocket(), reponse.c_str(), reponse.size(), 0);
+	return (0);
+}
+
+//Le client n'a pas les permissions nécessaires pour rejoindre le canal cible :
+// vous pouvez envoyer au client un message d'erreur "475"
+//Le client a déjà rejoint le canal cible : vous pouvez envoyer au client un message d'erreur "442" (You're already on that channel)
+// indiquant qu'il est déjà membre du canal cible.
+// note si le User est deja dans un channel ? > mode = 2
+
+int Command::join(User *U)
+{
+	std::cout << "COMMAND JOIN" << std::endl;
+	if (arguments.empty())
+		return -1;
+	// si le channel n existe pas > on le cree
+	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	if (it == Chan.end())
+	{
+		Channel *Cha =new Channel(arguments[0], U);
+		Chan.insert(std::pair<std::string, Channel *>(arguments[0], Cha));
+		std::string message = "JOIN " + arguments[0] + "\r\n";
+		// std::string message = "JOIN #le\r\n";
+		std::cout << "message = " << message << std::endl;
+		send(U->getUserSocket(), message.c_str(), message.length(), 0);
+		return (0);
+	}
+	// si le User est deja dans le channel
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
+	if (itUser != it->second->getUsers().end())
+		return -1;
+	//on rajoute le User dans le Channel
+	U->setUserMode(1);
+	U->setUserChannel(arguments[0]);
+	User  *Us =  new  User(U);
+	it->second->getUsers().insert(std::pair<int, User *>(U->getUserSocket(), Us));
+	return (0);
+}
+
+//permet de quitter un chanell
+int Command::part(User *U)
+{
+	std::cout << "COMMAND PART" << std::endl;
+	if (arguments.empty())
+		return -1;
+	// std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	std::map<std::string, Channel *>::iterator it = Chan.begin();
+	//si le channel exist pas
+	if (it == Chan.end())
+		return -1;
+	// std::string message = "PART" + U->getUserChannel() + "\r\n";
+	std::string message = "PART " + arguments[0] + "\r\n";
+	std::cout << "message = " << message << std::endl;
+	send(U->getUserSocket(), message.c_str(), message.length(), 0);
+	std::cout << "message = " << message << std::endl;
+	send(U->getUserSocket(), message.c_str(), message.length(), 0);
+	// on trouve le User et on le delete
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(U->getUserSocket());
+	if (itUser != it->second->getUsers().end())
+		delete itUser->second;
+	it->second->getUsers().erase(U->getUserSocket());
+	U->setUserMode(2);
+	U->setUserChannel("");
+	// si plus de Users delete le channel
+	if (it->second->getUsers().size() == 0)
+	{
+		delete it->second;
+		Chan.erase(it);
+	}
+	return 0;
+}
+
+//permet de donner le mode ope a un user normal
+// <target> <mode>
+int Command::mode(User *U)
+{
+	std::cout << "COMMAND MODE" << std::endl;
+	int Use;
+
+	// si le mode est pas ope ca sert a rien
+	if (arguments[1] != "2")
+		return -1;
+	if (arguments.empty() && arguments.size() != 2)
+		return -1;
+		// si le user n est pas un ope ou n est pas dans un channel
+	if (U->getUserMode() != 1)
+		return -1;
+	// on regarde si les 2 users sont dans le meme channel
+	std::map<std::string, Channel *>::iterator it = Chan.find(U->getUserChannel());
+	//on cherche le User et on le met ope
+	Use = find_User_string(arguments[1]);
+	std::map<int, User *>::const_iterator itUser = it->second->getUsers().find(Use);
+	if (itUser != it->second->getUsers().end())
+	{
+		itUser->second->setUserMode(2);
+		return 0;
+	}
+	return -1;
+}
+
+int Command::ping(User *U)
+{
+	std::cout << "COMMAND PING" << std::endl;
+	std::cout << " Ping =" << U->getUserSocket() << std::endl;
+	sendConfirmationMessage(U->getUserSocket(), "PONG", U->getUserNick());
+	return 0;
+}
+
+int Command::privmsg_user(User *U, std::string msg)
+{
+	int user = find_User_string(arguments[0]);
+	std::map<int, User *>::iterator it = Users.find(user);
+	if (it == Users.end())
+		return -3;
+	std::string message = "PRIVMSG " + U->getUserNick()  + msg;
+	sendConfirmationMessage(it->second->getUserSocket(), message, it->second->getUserNick() );
+	return 0;
+}
+int Command::privmsg(User *U)
+{
+	if (arguments.empty() && arguments.size() < 1)
+		return -2;
+	std::string msg;
+	std::vector<std::string>::iterator itvec = arguments.begin();
+	itvec++;
+	for (; itvec != arguments.end(); itvec++)
+		msg =  msg+ *itvec + " ";
+	//si le user est dans aucun channel
+	std::cout << "COMMAND PRIVMSG" << std::endl;
+	if (arguments[0][0] != '#')
+		return (privmsg_user(U, msg));
+	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
+	if (it == Chan.end())
+		return (-1);
+	// envoie un msg a tous les user dans le channel
+	std::map<int, User *>::iterator itUser = it->second->getUsers().begin();
+
+	for (;itUser != it->second->getUsers().end(); itUser++)
+	{
+		std::string message = ":"+ U->getUserNick() +" PRIVMSG " + arguments[0] + " :" + msg + "\r\n";
+		std::cout << " message =  " << message << itUser->second->getUserSocket() << std::endl;
+		std::cout << " user itus =  " <<  itUser->second->getUserNick() << std::endl;
+		if (itUser->second->getUserSocket() != U->getUserSocket())
+			send(itUser->second->getUserSocket(), message.c_str(), message.length(), 0);
+	}
+	return 0;
+}
+
+std::map<int, User *>  Command::set_Users()
+{
+	return this->Users;
+}
+
+std::map<std::string, Channel *>  Command::set_Chan()
+{
+	return this->Chan;
+}
+
+int	Command::ft_exec_cmd(int clientSock)
+{
+	std::string command[8] = {"NICK", "USER", "WHOIS", "JOIN", "PART" , "MODE", "PING", "PRIVMSG"};
+
+	std::map<int, User *>::iterator it = Users.find(clientSock);
+	int	(Command::*functptr[])(User*) = {&Command::nick, &Command::user, &Command::whois, &Command::join, &Command::part, &Command::mode,&Command::ping, &Command::privmsg};
 
 	int	ret;
-	for (int i = 0; i < 55; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		if (command[i] == cmd)
+		if (command[i] == _command)
 		{
-			ret = (*functptr[i])();
+			ret = (this->*functptr[i ])(it->second);
+			std::cout << "Retour cmd = " << ret << std::endl;
 			return (ret); // verifier code d'erreurs dans la doc IRC
 		}
 	}
-	return (-1) ; // aucune commande ne correspond // verifier code d'erreur dans la doc IRC
+	std::map<int, User *>::const_iterator ite;
+  	for (ite = Users.begin(); ite != Users.end(); ++ite)
+		std::cout << "USERs in serv = " << ite->second->getUserNick() << std::endl;
+	return 0;
 }
 
 /* Constructor */
 
-Command::Command(std::string msg, std::map<int, User*> Users) : _BrutMsg(msg), _cmd("") ,_args("")
+Command::Command(std::string msg, std::map<int, User*> Us, int clientSock, std::map<std::string, Channel *> Chann) : _BrutMsg(msg)
 {
-	size_t	pos;
+	std::istringstream ss(msg);
+	Users = Us;
+	Chan = Chann;
+	std::string token;
 
-	std::cout << "Constructeur called for : " << this->_BrutMsg << std::endl; // A supp
-	(void)Users;
-	if (msg[0] == '/')
+	while (std::getline(ss, token, ' '))
 	{
-		pos = msg.find(' '); // Si la fonction find trouve la premiere occurance elle renvoie sa position, sinon elle renvoie la valeur npos qui vaut -1
-		if (pos == msg.npos)
-		{
-			this->_cmd = msg.substr(1);
-		}
-		else
-		{
-			std::cout << "pos = " << pos << std::endl;
-			this->_cmd = msg.substr(1, pos);
-			this->_args = msg.substr(pos + 1);
-		}
+		arguments.push_back(token);
 	}
-	/* Convertir la commande en Majuscule */
-	for (size_t i = 0; i < this->_cmd.length(); ++i)
-	{
-		this->_cmd[i] = toupper(this->_cmd[i]);
-	}
-	std::cout << "CMD = " << this->_cmd << std::endl << "ARGS = " << this->_args << std::endl; // A supp
-
-	ft_exec_cmd(this->_cmd); // code retour ?? 
+	arguments = split_splace1(arguments);
+	_command = arguments[0];
+	arguments.erase(arguments.begin());
+	printVector(arguments);
+	ft_exec_cmd(clientSock); // code retour ??
+	arguments.clear();
 	return ;
 }
 
