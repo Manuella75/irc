@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:04 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 00:33:04 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/06 22:02:04 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,22 +47,13 @@ int	main (int argc, char **argv)
 
 /* TO DO:
 
-	-Nonblocking communication
-	-read all the buffer from client
-	-handle ip v6 ?
-	-handle les dependancies
-	-hamdle error msg
 	-hamdle error msg
 	-check pb fuser
 	-ping pong
-	-timeout
 	-mode
-	-envoie du welcome juste apres nick et user
-	-user nickname max 9
 	-max users
 	-maxbacklog
 	-user invisible a l'arrivee
-	-message du nick si deja utiliser
 	 -message mode du chan a larrivee
 	 channel delete si ops part sans user connected
 
@@ -84,8 +75,9 @@ int	main (int argc, char **argv)
 		- +l, limite le nb de users ds un chan
 
 		*User*
-
-		-
+		
+		-i
  */
 
 //check erase user + channel + signal delete tout
+//ajout clean fin du server
