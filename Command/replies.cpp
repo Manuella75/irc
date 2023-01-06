@@ -1,6 +1,4 @@
 #include "User.hpp"
-#ifndef REPLY_CPP
-#define REPLY_CPP
 #include "Command.hpp"
 
 /******************************************************************************/

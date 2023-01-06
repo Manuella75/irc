@@ -11,9 +11,9 @@
 class	User
 {
 	private :
-	std::string	_nickname;
-	std::string	_UserHosts;
 	int _socket;
+	std::string	_UserHosts;
+	std::string	_nickname;
 	//map avec bool 1 pour op du premier qui rejoin le channel
 	std::map<std::string, bool> _channel;
 	//vecteur >  delete  juste delete le chann ou on est
@@ -28,9 +28,9 @@ class	User
 	bool						_connected;
 	time_t						_lastPing;
 
-	public :
-		std::string  username;
-		std::string realname;
+	// public :
+		// std::string  username;
+		// std::string realname;
 
 		/* Constructor */
 		User(std::string host, int socket);
@@ -45,7 +45,6 @@ class	User
 		void	deleteUserlastChannel();
 		void reply(unsigned short code, std::string arg1 = "", std::string arg2 = "", std::string arg3 = "", std::string arg4 = "", std::string arg5 = "", std::string arg6 = "", std::string arg7 = "");
 		/* Destructor */
-		~User(void);
 		/* Destructor */
 		~User(void);
 

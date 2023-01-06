@@ -6,11 +6,21 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 00:19:36 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/06 00:57:59 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
+
+void sendMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
+  // Construisez le message de confirmation en suivant le format du protocole IRC
+  std::string message = ": 001 "  + Username + " " + confirmationMessage + "\r\n";
+
+  // Envoyez le message au client en utilisant la fonction send()
+  send(clientSocket, message.c_str(), message.length(), 0);
+}
+
+
 Server::Server(std::string input_port, std::string input_passwd)
 {
 	if (valid_args(input_port, input_passwd) == false)
@@ -244,7 +254,7 @@ void	Server::sendPing()
 	for (std::map<int, User*>::const_iterator it = Users.begin(); it != Users.end(); ++it)
 	{
 		if (it->second->getLastPing() >= 60)
-			Command::sendConfirmationMessage(it->second->getUserSocket(), "PING", it->second->getUserNick());
+			sendMessage(it->second->getUserSocket(), "PING", it->second->getUserNick());
 	}
 }
 

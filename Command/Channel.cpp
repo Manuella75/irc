@@ -4,7 +4,7 @@ Channel::Channel(std::string  name, User *creator) : _name(name), _creator(creat
 {
 	//User  *Us =  new  User(U);
 	creator->setUserMode(1);
-	creator->setUserChannel(name);
+	creator->setUserChannel(name, 1);
 	_Users.insert(std::pair<int , User *>(creator->getUserSocket(), creator));
 	_topic = "";
 }
@@ -28,15 +28,7 @@ Channel &Channel::operator=(Channel const & rhs)
 
 Channel::~Channel(){}
 
-std::string const & Channel::getName() const
-{
-	return _name;
-}
 
-std::string const & Channel::getTopic() const
-{
-	return _topic;
-}
 
 void  Channel::setTopic(std::string topic)
 {
@@ -62,8 +54,6 @@ void  Channel::addBanni(int i)
 {
 	_Banni.push_back(i);
 }
-Channel::~Channel()
-{}
 
 User *Channel::getOneMember(std::string member) const
 {
@@ -102,14 +92,4 @@ std::string const & Channel::getName() const
 std::string const & Channel::getTopic() const
 {
 	return _topic;
-}
-
-std::map<int, User *> & Channel::getUsers()
-{
-	return _Users;
-}
-
-std::map<int, User *> const & Channel::getUsers() const
-{
-	return _Users;
 }
