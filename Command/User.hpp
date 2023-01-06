@@ -22,9 +22,10 @@ class	User
 	std::string _cmd;
 
 	public :
-		bool oper;
-		std::string realname;
-	int					_mode;
+	
+	bool 						oper;
+	std::string 				realname;
+	int							_mode;
 	bool						_connected;
 	time_t						_lastPing;
 

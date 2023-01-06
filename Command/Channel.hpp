@@ -14,8 +14,12 @@ class Channel
 		std::vector<int>	_Banni;
 		std::string 					_name; // channel name
 		std::string 					_topic; // chanel topic
-		std::map<int, User *> 			_Users; // channel users
+		std::map<int, User *> 			Members; // channel users
 		User							*_creator; // the creator
+		bool							_modModer;
+		bool							_modInvit;
+		bool							_modLimit;
+		size_t							_maxUsers;
 
 	public :
 	 	Channel(std::string const  name, User *creator);
