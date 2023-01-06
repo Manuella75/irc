@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/04 20:02:55 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/05 18:44:40 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void Server::run()
 		Server::deconnectUsers();
 		Server::removeEmptyChannel();
 	}
+	// ajout de clean
 }
 
 int Server::createSocket()
@@ -113,13 +114,14 @@ int Server::waitConnection()
     std::string time_str = asctime(time_info);
     time_str.erase(time_str.size() - 1);
 	std::cout << time_str << ": Server running ..." << std::endl;
-	// std::cout << "" << std::endl;
 	Server::sendPing();
 	nb_event = poll(&_pfds[0], _pfds.size(), 5000);  /* changer le timeout */
 	// std::cout << "Poll result : " << nb_event << std::endl;
 	if (nb_event == -1)
 	{
-		std::cout << "Poll failed " << std::endl;
+		if (errno != EWOULDBLOCK)
+			return 0;
+ 		std::cout << "Poll failed " << std::endl;
 		return -1;
 	}
 
@@ -179,15 +181,13 @@ int Server::rcvFromClient(int fd)
 	/////  Reception de toutes les donnees sur le socket client   /////
 	
 	memset(buf, 0, BUFFERSIZE + 1); 			
-	byteRcv = recv(fd, buf, BUFFERSIZE + 1, 0);							// Reception des strings
+	byteRcv = recv(fd, buf, BUFFERSIZE + 1, 0);						// Reception des strings
 	Server::getUser(fd)->resetPing();
 	if (byteRcv == -1)
 		return -1;
 	else if (byteRcv == 0)
 	{
 		Users.find(fd)->second->disconnect();
-		// _pfds.erase(_pfds.begin() + pos);
-		// Users.erase(fd);
 		return 0;
 	}
 	// std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
