@@ -93,16 +93,21 @@ int	Command::user(User  *U)
 		+ "NICK :" + arguments[0]  + "\r\n";
 		send(U->getUserSocket(), msg.c_str(), msg.length(), 0);
 	}
+	// std::string reponse = "001 redarnet :Welcome to the Network, redarnet[!redarnet@] \r\n";
+	std::string reponse = "001 " + U->getUserNick() + " :Welcome to the Network, " + U->getUserNick() + "[!" + U->getUserHost() + "@] \r\n";
+	send(U->getUserSocket(), reponse.c_str(), reponse.size(), 0);
+	U->cmduser = 1;
 	return (1);
 }
 
 int	Command::whois(User *U)
 {
-	std::cout << "COMMAND WHHOIS" << std::endl;
-	 std::string message = ":localhost " + U->getUserNick() +
-	  " " + U->getUserNick() + " " + U->getUserNick() + " " + U->getUserHost() + " * :" + U->realname + "\r\n";
-	std::cout << " Whois message =" << message << std::endl;
-	send(U->getUserSocket(),message.c_str(), message.size(), 0);
+	(void)U;
+	// std::cout << "COMMAND WHHOIS" << std::endl;
+	//  std::string message = ":localhost " + U->getUserNick() +
+	//   " " + U->getUserNick() + " " + U->getUserNick() + " " + U->getUserHost() + " * :" + U->realname + "\r\n";
+	// std::cout << " Whois message =" << message << std::endl;
+	// send(U->getUserSocket(),message.c_str(), message.size(), 0);
 	return (0);
 }
 
@@ -112,6 +117,10 @@ int Command::join(User *U)
 	std::cout << "COMMAND JOIN" << std::endl;
 	if (arguments.empty())
 		return (U->reply(461, _command), -1);
+	if (arguments[0][0] != '#')
+	{
+		return (U->reply(461, _command), -1);
+	}
 	U->setUserChannel(arguments[0]);
 	// si le channel n existe pas > on le cree
 	std::map<std::string, Channel *>::iterator it = Chan.find(arguments[0]);
@@ -275,14 +284,12 @@ int Command::privmsg_user(User *U, std::string msg)
 		U->reply(411);
 		return -1;
 	}
+	// on peut pas s envoyer des msg a soit meme
 	if (it->second->getUserNick() == U->getUserNick())
-	{
 		return -1;
-	}
 	std::string message =  U->getUserNick() + " " + msg;
 	it->second->setUserChannel("");
 	it->second->reply(502, message);
-	// send_message(it->second, "NOTICE ", message);
 	return 0;
 }
 
@@ -306,7 +313,7 @@ int Command::privmsg(User *U)
 		U->reply(401, arguments[0]);
 		return (-1);
 	}
-	//verifie que le User est dans les chan
+	//verifie que le User est dans le chan
 	if (it->second->verif_user(U->getUserSocket()) != 1)
 		return (-1);
 
@@ -374,6 +381,8 @@ int	Command::oper(User *U)
 {
 	std::cout << "COMMAND OPER" << std::endl;
 
+	if (arguments.empty() && arguments.size() < 1)
+		return (U->reply(461, _command), -1);
 	if (U->oper == 1)
 		return 0;
 	if (arguments[1] == "mdp")

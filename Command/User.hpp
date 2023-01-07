@@ -24,6 +24,7 @@ class	User
 	public :
 		bool oper;
 		std::string realname;
+		int	 cmduser;
 	int					_mode;
 	bool						_connected;
 	time_t						_lastPing;

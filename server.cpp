@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/07 00:40:36 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/07 03:57:05 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,10 +98,6 @@ void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add
 			return;
 		Users.insert(std::pair<int, User *>(sock, new_user));
 		std::cout << " socket = " << sock << std::endl;
-		std::string reponse = "001 redarnet :Welcome to the <> Network, redarnet[!redarnet@] \r\n";
-		send(sock, reponse.c_str(), reponse.size(), 0);
-		// std::string response = "001 mettien :welcome to the network, mettien[!mettien@] \r\n";
-		// send(sock, response.c_str(), response.size(), 0);
 	}
 	_pfds.push_back(pollfd());
 	_pfds.back().fd = sock;
@@ -183,6 +179,15 @@ void	Server::setUserInfo(std::string buff, int fd)
 		Chans =  cmd.set_Chan();
 	}
 	vec.clear();
+	std::map<int, User *>::iterator itUser = Users.find(fd);
+	if (itUser != Users.end())
+	{
+		if (itUser->second->cmduser != 1)
+			Command("USER Theo", Users, itUser->first, Chans);
+		// recup env ?
+	}
+
+	// if cmd usr != 1 User = redarnet
 }
 
 int Server::rcvFromClient(int fd)
