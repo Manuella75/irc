@@ -6,18 +6,21 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 00:57:59 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/07 00:40:36 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/server.hpp"
 
-void sendMessage(int clientSocket, const std::string& confirmationMessage, std::string Username) {
-  // Construisez le message de confirmation en suivant le format du protocole IRC
-  std::string message = ": 001 "  + Username + " " + confirmationMessage + "\r\n";
+void	Server::sendMessage(User *U, std::string message, std::string arg)
+{
+	std::string msg;
 
-  // Envoyez le message au client en utilisant la fonction send()
-  send(clientSocket, message.c_str(), message.length(), 0);
+	msg = ":" + U->getUserNick() + "!" + U->getUserHost() + "@localhost "
+	 + message + arg + "\r\n";
+	std::cout << "msg =" << msg << " socket = " << U->getUserSocket() << std::endl;
+	send(U->getUserSocket(), msg.c_str(), msg.length(), 0);
+
 }
 
 
@@ -254,7 +257,7 @@ void	Server::sendPing()
 	for (std::map<int, User*>::const_iterator it = Users.begin(); it != Users.end(); ++it)
 	{
 		if (it->second->getLastPing() >= 60)
-			sendMessage(it->second->getUserSocket(), "PING", it->second->getUserNick());
+			this->sendMessage(it->second, "PING", " :redarnet");
 	}
 }
 

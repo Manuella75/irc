@@ -2,9 +2,10 @@
 
 Channel::Channel(std::string  name, User *creator) : _name(name), _creator(creator)
 {
-	//User  *Us =  new  User(U);
-	creator->setUserMode(1);
-	creator->setUserChannel(name, 1);
+	// User  *Us =  new  User(creator);
+	_channelOp =  creator->getUserSocket();
+	std::cout << "CHan op = "<< this->getChannelOp() << std::endl;
+	std::cout << "CHan op = "<< this->getName() << std::endl;
 	_Users.insert(std::pair<int , User *>(creator->getUserSocket(), creator));
 	_topic = "";
 }
@@ -23,6 +24,7 @@ Channel &Channel::operator=(Channel const & rhs)
 	_name = rhs.getName();
 	_topic =  rhs.getTopic();
 	_Users =  rhs.getUsers();
+	_channelOp =  rhs._channelOp;
 	return *this;
 }
 
@@ -89,7 +91,23 @@ std::string const & Channel::getName() const
 	return _name;
 }
 
+int		Channel::getChannelOp()
+{
+	return _channelOp;
+}
+
+
 std::string const & Channel::getTopic() const
 {
 	return _topic;
+}
+int		Channel::verif_user(int socket)
+{
+	std::map<int, User *>::iterator it = _Users.begin();
+	for (; it != _Users.end(); it++)
+	{
+		if (it->first == socket)
+			return 1;
+	}
+	return 0;
 }

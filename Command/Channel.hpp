@@ -16,6 +16,7 @@ class Channel
 		std::string 					_topic; // chanel topic
 		std::map<int, User *> 			_Users; // channel users
 		User							*_creator; // the creator
+		 int _channelOp;
 
 	public :
 	 	Channel(std::string const  name, User *creator);
@@ -31,12 +32,14 @@ class Channel
 		User*								getOneMember(std::string member) const;
 		std::map<int, User*> &				getAllMembers();
 		std::string	const &					getName() const;
+		int									getChannelOp();
 		std::string const & 				getTopic() const;
 		std::map<int, User *> const& 		getUsers() const;
 		std::map<int, User *>  & 			getUsers();
 
 		void								kickMember(User *member);
 		void								addMember(User *member);
+		int									verif_user(int socket);
 
 };
 #endif

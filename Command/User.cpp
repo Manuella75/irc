@@ -13,7 +13,7 @@ User::User (std::string host, int socket) : _socket(socket), _UserHosts(host), _
 	_connected = true;
 	oper = 0;
 	_nickname = "";
-	// _channel = "";
+	_channel = "";
 }
 
 User::User(User const & cpy){
@@ -29,7 +29,6 @@ User & User::operator=(User const & rhs)
 	this->_UserHosts = rhs.getUserHost();
 	this->_nickname = rhs.getUserNick();
 	this->_socket = rhs.getUserSocket();
-	this->_channel = rhs.getUserChannel();
 	return *this;
 }
 
@@ -64,24 +63,6 @@ int  User::getUserSocket() const
 }
 
 
-std::map<std::string, bool> const  User::getUserChannel() const
-{
-	return _channel;
-}
-
-std::string const  User::getUserlastChannel() const
-{
-	std::map<std::string, bool>::const_iterator it = _channel.end();
-	it--;
-	return it->first;
-}
-
-int   User::getUserlastChannelOpe() const
-{
-	std::map<std::string, bool>::const_iterator it = _channel.end();
-	it--;
-	return it->second;
-}
 void  User::setUserNick(std::string nick)
 {
 	_nickname = nick;
@@ -89,27 +70,6 @@ void  User::setUserNick(std::string nick)
 void  User::setUserHost(std::string host)
 {
 	_UserHosts = host;
-}
-void  User::setUserChannel(std::string chann, bool bo)
-{
-	// need to check si le channel existe
-	std::map<std::string, bool>::iterator it = _channel.begin();
-	for (; it != _channel.end(); it++)
-	{
-		if (it->first == chann)
-			_channel.erase(it);
-	}
-	_channel.insert(std::pair<std::string, bool>(chann, bo));
-	// _channel = chann;
-}
-
-void User::deleteUserlastChannel()
-{
-	std::map<std::string, bool>::iterator it = _channel.begin();
-	for (;it != _channel.end(); it++)
-	;
-	it--;
-	_channel.erase(it);
 }
 int  User::getUserMode() const
 {
@@ -121,10 +81,16 @@ void  User::setUserMode(int mode)
 	_mode = mode;
 }
 
-// std::string const  User::getUserChannel() const
-// {
-// 	return _channel;
-// }
+std::string const  User::getUserChannel() const
+{
+	return _channel;
+}
+
+void	User::setUserChannel(std::string channel)
+{
+	_channel = channel;
+}
+
 
 bool	User::getConnected() const
 {
@@ -135,15 +101,7 @@ void 	User::resetPing()
 {
 	_lastPing = time(0);
 }
-// void  User::setUserNick(std::string nick)
-// {
-// 	_nickname = nick;
-// }
 
-// void  User::setUserChannel(std::string chann)
-// {
-// 	_channel = chann;
-// }
 
 User::~User(void)
 {

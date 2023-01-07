@@ -40,17 +40,22 @@ class	Command
 		int join(User *U);
 		int part(User *U);
 		int ping(User *U);
+		int pong(User *U);
 		int mode(User *U);
 		int topic(User *U);
 		int privmsg(User *U);
+		int notice(User *U);
 		int	oper(User *U);
 		int privmsg_user(User *U, std::string msg);
+		int notice_user(User *U, std::string msg);
 		int	kick(User *U);
 		void	send_message_chan(User *U, std::string message, Channel chan);
 		int setUser_name(User *U);
 		void	send_message(User *U, std::string message, std::string arg);
+		void	send_message_all(User *U, std::string message, std::string arg);
 		int	nicknameisue();
-		int	check_operator(User *U);
+		int	check_operator(User *U, Channel chan);
+		Channel getChannel(std::string chan);
 		/* Destructor */
 		~Command(void);
 };

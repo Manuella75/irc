@@ -153,7 +153,7 @@ std::string ERR_UMODEUNKNOWNFLAG() { return ":Unknown MODE flag"; }
 /******************************************************************************/
 /*                                   5**                                      */
 /******************************************************************************/
-std::string ERR_USERSDONTMATCH() { return ":Can't change mode for other users"; }
+std::string MSG_PV(std::string prefix) { return ":\033[1;32m privmsg \033[0m"+ prefix; }
 
 
 std::string getReplies(unsigned short code, std::string arg1, std::string arg2, std::string arg3, std::string arg4, std::string arg5, std::string arg6, std::string arg7)
@@ -444,7 +444,7 @@ std::string getReplies(unsigned short code, std::string arg1, std::string arg2, 
 	case 501:
 		return target + ERR_UMODEUNKNOWNFLAG();
 	case 502:
-		return target + ERR_USERSDONTMATCH();
+		return target + MSG_PV(arg1);
 	default:
 		return std::string();
 	}
@@ -455,8 +455,8 @@ void User::reply(unsigned short code, std::string arg1 , std::string arg2 , std:
 	std::ostringstream oss;
 	std::string channel;
 	oss << code;
-	if (this->_channel.size() > 0)
-		channel += " " + this->getUserlastChannel();
+	if (this->getUserChannel() != "")
+		channel += " " + this->getUserChannel();
 
 
 

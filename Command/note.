@@ -6,10 +6,10 @@ but a regler =
  - command invite a faire si channel mode = +i
  - command notice a faire 
  - command oper > idk admin > admin 
-    // > leaks  
-    // cpy user > channel et user > serveur/cmd
-    //bug avec kick / modo etc 
+  // > leaks  
+  // cpy user > channel et user > serveur/cmd
 
 //msg prive 
 :leo!redarnet@localhost PRIVMSG theo :wrrw wrrw wrwr wr
 :theo!redarnet@localhost 324 theo #le +n 
+/ping 

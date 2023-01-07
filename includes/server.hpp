@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 00:48:47 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/06 23:28:04 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ public:
 
     // Main loop //
     void        run();
+	void	sendMessage(User *U, std::string message, std::string arg);
 
     // Get functions //
     int                                     getPort() const;
