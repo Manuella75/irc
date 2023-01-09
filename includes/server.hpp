@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 23:28:04 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/09 00:39:34 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@
 #include <iostream>
  #include <signal.h>
 #include "../Command/Command.hpp"
-#include "../Command/User.hpp"
-#include "../Command/Channel.hpp"
+#include "../User/User.hpp"
+#include "../Channel/Channel.hpp"
 
 #define BUFFERSIZE 512
 

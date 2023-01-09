@@ -2,11 +2,16 @@ NAME = ircserv
 CC = c++
 SRCS =	main.cpp\
 		server.cpp\
-		Command/User.cpp\
+		User/User.cpp\
+		User/replies.cpp\
+		Channel/Channel.cpp\
 		Command/Command.cpp\
 		Command/Command_utils.cpp\
-		Command/replies.cpp\
-		Command/Channel.cpp
+		Command/Command_msg.cpp\
+		Command/Command_channel.cpp\
+		Command/Command_user.cpp\
+
+
 OBJS = $(addprefix objs/, $(SRCS:.cpp=.o))
 DEPS = $(addprefix objs/, $(SRCS:.cpp=.d))
 HEADER = ./includes

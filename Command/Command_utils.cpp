@@ -1,7 +1,7 @@
 #include "Command.hpp"
 
 
-void	Command::send_message_chan(User *U, std::string message, Channel chan)
+void	Command::send_message_chan(User *U, std::string message,std::string arg, Channel chan)
 {
 	std::string msg;
 	std::map<int, User *>::const_iterator itUser;
@@ -9,7 +9,7 @@ void	Command::send_message_chan(User *U, std::string message, Channel chan)
 	for (itUser = chan.getUsers().begin(); itUser != chan.getUsers().end(); itUser++)
 	{
 		msg = ":" + U->getUserNick() + "!" + U->getUserHost() + "@localhost "
-		 + message + " " + chan.getName() + "\r\n";
+		 + message + " " + chan.getName() + arg +  "\r\n";
 		std::cout << "msg =" << msg << " socket = " << itUser->second->getUserSocket() << std::endl;
 		send(itUser->second->getUserSocket(), msg.c_str(), msg.length(), 0);
 		msg.clear();
@@ -83,4 +83,15 @@ Channel Command::getChannel(std::string chan)
 {
 	std::map<std::string, Channel *>::const_iterator it = Chan.find(chan);
 	return it->second;
+}
+
+int	Command::find_User_string(std::string target)
+{
+	std::map<int, User *>::iterator it = Users.begin();
+	for (; it != Users.end(); it++)
+	{
+		if (it->second->getUserNick() == target)
+			return it->first;
+	}
+	return -1;
 }

@@ -1,7 +1,8 @@
 objs/Command/Command.o: Command/Command.cpp Command/Command.hpp \
   Command/../includes/server.hpp includes/../Command/Command.hpp \
-  includes/../Command/User.hpp includes/../Command/Channel.hpp \
-  Command/User.hpp Command/Utils.hpp Command/Channel.hpp
+  includes/../User/User.hpp includes/../User/../includes/server.hpp \
+  includes/../Channel/Channel.hpp includes/../Channel/../User/User.hpp \
+  Command/../User/User.hpp Command/../Channel/Channel.hpp
 
 Command/Command.hpp:
 
@@ -9,12 +10,14 @@ Command/../includes/server.hpp:
 
 includes/../Command/Command.hpp:
 
-includes/../Command/User.hpp:
+includes/../User/User.hpp:
 
-includes/../Command/Channel.hpp:
+includes/../User/../includes/server.hpp:
 
-Command/User.hpp:
+includes/../Channel/Channel.hpp:
 
-Command/Utils.hpp:
+includes/../Channel/../User/User.hpp:
 
-Command/Channel.hpp:
+Command/../User/User.hpp:
+
+Command/../Channel/Channel.hpp:

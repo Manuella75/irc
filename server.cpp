@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/07 03:57:05 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/09 01:36:48 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,8 +175,8 @@ void	Server::setUserInfo(std::string buff, int fd)
 	for (; it != vec.end();it++)
 	{
 		Command cmd(*it, Users, fd, Chans);
-		Users =  cmd.set_Users();
-		Chans =  cmd.set_Chan();
+		Users =  cmd.get_Users();
+		Chans =  cmd.get_Chan();
 	}
 	vec.clear();
 	std::map<int, User *>::iterator itUser = Users.find(fd);

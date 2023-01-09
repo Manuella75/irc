@@ -1,5 +1,5 @@
 #include "User.hpp"
-#include "Command.hpp"
+#include "../Command/Command.hpp"
 
 /******************************************************************************/
 /*                                   0**                                      */

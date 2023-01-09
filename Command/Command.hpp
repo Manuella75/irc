@@ -5,12 +5,11 @@
 # include <cctype>
 #include <map>
 #include "../includes/server.hpp"
-#include "User.hpp"
+#include "../User/User.hpp"
 #include <vector>
 #include <string>
 #include <sstream>
-#include "Utils.hpp"
-#include "Channel.hpp"
+#include "../Channel/Channel.hpp"
 
 class Channel;
 class User;
@@ -32,8 +31,8 @@ class	Command
 		Command(std::string cmd, std::map<int, User*> Users, int clientSock, std::map<std::string, Channel *> Chan);
 		int	ft_exec_cmd(int clientSock);
 		int	find_User_string(std::string target);
-		std::map<int, User *> set_Users();
-		std::map<std::string, Channel *> set_Chan();
+		std::map<int, User *> get_Users();
+		std::map<std::string, Channel *> get_Chan();
 		int	nick(User *U);
 		int	user(User *U);
 		int	whois(User *U);
@@ -49,7 +48,7 @@ class	Command
 		int privmsg_user(User *U, std::string msg);
 		int notice_user(User *U, std::string msg);
 		int	kick(User *U);
-		void	send_message_chan(User *U, std::string message, Channel chan);
+		void	send_message_chan(User *U, std::string message,std::string arg, Channel chan);
 		int setUser_name(User *U);
 		void	send_message(User *U, std::string message, std::string arg);
 		void	send_message_all(User *U, std::string message, std::string arg);
