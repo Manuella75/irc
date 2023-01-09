@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 00:48:47 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/10 00:34:50 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ private:
     std::vector<pollfd> _pfds;
 
     // Class //
-    std::map<int , User *> Users;
+    std::map<int , User *>             Users;
 	std::map<std::string, Channel *> Chans;
 
     // Create a socket //
@@ -93,7 +93,9 @@ public:
     // Get functions //
     int                                     getPort() const;
     std::string                             getPasswd() const;
-    User *                                  getUser(int fd) const;
+    User *                                  getOneUser(int fd) const;
+    static User *                           getOneUser(std::string nick);
+    std::map<int, User *> const &           getUsers(void) const;
     std::map<std::string, Channel*>	const&  getChannel() const;
 
     // Check functions //

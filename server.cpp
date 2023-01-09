@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/06 22:02:32 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/10 00:34:32 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,7 +195,7 @@ int Server::rcvFromClient(int fd)
 	
 	memset(buf, 0, BUFFERSIZE + 1); 			
 	byteRcv = recv(fd, buf, BUFFERSIZE + 1, 0);						// Reception des strings
-	Server::getUser(fd)->resetPing();
+	Server::getOneUser(fd)->resetPing();
 	if (byteRcv == -1)
 		return -1;
 	else if (byteRcv == 0)
@@ -311,7 +311,7 @@ std::string Server::getPasswd() const
 	return (this->_passwd);
 }
 
-User *Server::getUser(int fd) const
+User *Server::getOneUser(int fd) const
 {
 	std::map<int, User*>::const_iterator	it;
 
@@ -319,6 +319,21 @@ User *Server::getUser(int fd) const
 	if (it == Users.end())
 		return NULL;
 	return it->second;
+}
+
+User *Server::getOneUser(std::string nick)
+{
+	for (std::map<int, User*>::iterator it = Users.begin(); it != Users.end();)
+	{
+		if (it->second->getUserNick() == nick)
+		return it->second;
+	}
+	return NULL;
+}
+
+std::map<int, User *> const & Server::getUsers(void) const 
+{
+	return this->Users; 
 }
 
 bool Server::hasPasswd() const

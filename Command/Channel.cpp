@@ -5,10 +5,8 @@ Channel::Channel(std::string  name, User *creator) : _name(name), _creator(creat
 	creator->setUserMode(1);
 	creator->setUserChannel(name, 1);
 	Members.insert(std::pair<int , User *>(creator->getUserSocket(), creator));
+	_mode = "";
 	_topic = "";
-	_modModer = false;
-	_modInvit = false;	
-	_modLimit = false;
 	_maxUsers = 0;
 }
 
@@ -54,9 +52,19 @@ std::vector<int> const & Channel::getBanni() const
 	return _Banni;
 }
 
-void  Channel::addBanni(int i)
+std::string const & Channel::getName() const
 {
-	_Banni.push_back(i);
+	return _name;
+}
+
+std::string const & Channel::getTopic() const
+{
+	return _topic;
+}
+
+std::string	Channel::getMode() const
+{
+	return _mode;
 }
 
 User *Channel::getOneMember(std::string member) const
@@ -82,9 +90,14 @@ void	Channel::kickMember(User *member)
 		Members.erase(member->getUserSocket());
 }
 
+void  Channel::addBanni(int i)
+{
+	_Banni.push_back(i);
+}
+
 void	Channel::addMember(User *member)
 {
-	if (_modLimit == true && (Members.size() >= _maxUsers))
+	if (_mode.find('l') == true && (Members.size() >= _maxUsers))
 	{
 		member->reply(471, _name);
 		return ;
@@ -92,12 +105,26 @@ void	Channel::addMember(User *member)
 	Members.insert(std::make_pair(member->getUserSocket(), member));
 }
 
-std::string const & Channel::getName() const
+void Channel::addMode(char mode)
 {
-	return _name;
+	if (_mode.find(mode) == std::string::npos)
+		_mode += mode;
+	else
+		return;
 }
 
-std::string const & Channel::getTopic() const
+void Channel::removeMode(char mode)
 {
-	return _topic;
+	if (_mode.find(mode) != std::string::npos)
+		_mode.erase(_mode.find(mode), 1);
+	else
+		return;
 }
+
+std::string Channel::display()
+{
+	std::string mode_info = "mode/#" + getName() + " [+" + getMode() + "]";
+	std::string chan_info = "Channel #" + getName() + " created " ; // ajout time
+	return (mode_info + "\n" + chan_info);
+}
+

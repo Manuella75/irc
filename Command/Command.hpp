@@ -11,9 +11,11 @@
 #include <sstream>
 #include "Utils.hpp"
 #include "Channel.hpp"
+#include "../includes/server.hpp"
 
 class Channel;
-class User;
+// class User;
+class Server;
 
 class	Command
 {

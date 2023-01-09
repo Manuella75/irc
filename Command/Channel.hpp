@@ -7,7 +7,10 @@
 #include <iostream>
 #include "User.hpp"
 
+
 class User;
+class Server;
+
 class Channel
 {
 	private:
@@ -16,9 +19,7 @@ class Channel
 		std::string 					_topic; // chanel topic
 		std::map<int, User *> 			Members; // channel users
 		User							*_creator; // the creator
-		bool							_modModer;
-		bool							_modInvit;
-		bool							_modLimit;
+		std::string						_mode;
 		size_t							_maxUsers;
 
 	public :
@@ -38,9 +39,13 @@ class Channel
 		std::string const & 				getTopic() const;
 		std::map<int, User *> const& 		getUsers() const;
 		std::map<int, User *>  & 			getUsers();
+		std::string							getMode() const;
 
 		void								kickMember(User *member);
 		void								addMember(User *member);
+		void								addMode(char mode);
+		void								removeMode(char mode);
+		std::string							display();
 
 };
 #endif

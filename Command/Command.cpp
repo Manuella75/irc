@@ -192,12 +192,50 @@ int Command::part(User *U)
 int Command::mode(User *U)
 {
 	std::cout << "COMMAND MODE" << std::endl;
-	(void)U;
-	// if (argument[0].find_first_of("#") != argument[0].end())
-	// {
-	// 
-// 
-	// }
+	if (arguments.size() == 0)
+	{
+		U->reply(461, "MODE");					// Not enough params given
+		return 0;
+	}
+	if (arguments[0].find_first_of("#") == 0)	// Search mode for Channel
+	{
+		if (arguments[0].size() > 1)
+		{
+			if (Server::getOneUser(U->getUserSocket()) != NULL)
+			{
+				
+			}
+			for (std::map<std::string, Channel *>::iterator it = Chan.begin(); it != Chan.end(); it++)
+			{
+				if(arguments[0].compare(1, arguments[0].size(), it->second->getName()) == 0) // check #s 
+				{
+					//check arguments[1] si exist check op si exist pas display
+					if (arguments.size() == 1)
+					{
+						
+					}
+					else
+						send_message(U, it->second->display(), "");
+				}
+				return 0;
+			}
+		}
+		U->reply(403, arguments[0]);			// No such channel
+		return 0;
+	}
+	else if (arguments[0] != U->getUserNick()) 
+	{
+		if (serv->getOneUser(arguments[1]) != NULL)
+		{
+			if (arguments.size() > 2)
+			{
+				// check mode exist
+			}
+			send_message(U, std::string("Can't view modes for others users"), "");
+		}
+		U->reply(401, arguments[0]); 			// No such nick/channel
+		return 0;
+	}
 	// else // mode pour Users
 	return -1;
 }
