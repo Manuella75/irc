@@ -193,11 +193,11 @@ int Command::mode(User *U)
 {
 	std::cout << "COMMAND MODE" << std::endl;
 	(void)U;
-	if (argument[0].find_first_of("#") != argument[0].end())
-	{
-	
-
-	}
+	// if (argument[0].find_first_of("#") != argument[0].end())
+	// {
+	// 
+// 
+	// }
 	// else // mode pour Users
 	return -1;
 }
