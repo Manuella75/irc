@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/19 16:53:23 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/10 00:34:50 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/11 00:22:51 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ extern bool is_running;
 
 class Channel;
 class Command;
+class User;
 
 class Server
 {
@@ -94,7 +95,7 @@ public:
     int                                     getPort() const;
     std::string                             getPasswd() const;
     User *                                  getOneUser(int fd) const;
-    static User *                           getOneUser(std::string nick);
+    User *                                  getOneUser(std::string nick);
     std::map<int, User *> const &           getUsers(void) const;
     std::map<std::string, Channel*>	const&  getChannel() const;
 

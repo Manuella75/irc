@@ -6,7 +6,7 @@
 /*   By: mettien <mettien@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/10 00:34:32 by mettien          ###   ########.fr       */
+/*   Updated: 2023/01/11 00:10:01 by mettien          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,7 @@ void	Server::setUserInfo(std::string buff, int fd)
 	std::vector<std::string>::iterator it = vec.begin();
 	for (; it != vec.end();it++)
 	{
-		Command cmd(*it, Users, fd, Chans);
+		Command cmd(*it, Users, fd, Chans, this);
 		Users =  cmd.set_Users();
 		Chans =  cmd.set_Chan();
 	}

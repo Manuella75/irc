@@ -14,7 +14,7 @@
 #include "../includes/server.hpp"
 
 class Channel;
-// class User;
+class User;
 class Server;
 
 class	Command
@@ -25,13 +25,13 @@ class	Command
 		std::vector<std::string> arguments;
 		std::map<int, User *> Users;
 		std::map<std::string, Channel *> Chan;
-	// User		_User;
-
+		Server	*_serv;
+./ir	
 
 
 	public :
 		/* Constructor */
-		Command(std::string cmd, std::map<int, User*> Users, int clientSock, std::map<std::string, Channel *> Chan);
+		Command(std::string cmd, std::map<int, User*> Users, int clientSock, std::map<std::string, Channel *> Chan, Server *serv);
 		int	ft_exec_cmd(int clientSock);
 		int	find_User_string(std::string target);
 		std::map<int, User *> set_Users();

@@ -201,7 +201,7 @@ int Command::mode(User *U)
 	{
 		if (arguments[0].size() > 1)
 		{
-			if (Server::getOneUser(U->getUserSocket()) != NULL)
+			if (_serv->getOneUser(U->getUserSocket()) != NULL)
 			{
 				
 			}
@@ -225,7 +225,7 @@ int Command::mode(User *U)
 	}
 	else if (arguments[0] != U->getUserNick()) 
 	{
-		if (serv->getOneUser(arguments[1]) != NULL)
+		if (_serv->getOneUser(arguments[1]) != NULL)
 		{
 			if (arguments.size() > 2)
 			{
@@ -417,12 +417,13 @@ int	Command::ft_exec_cmd(int clientSock)
 
 /* Constructor */
 
-Command::Command(std::string msg, std::map<int, User*> Us, int clientSock, std::map<std::string, Channel *> Chann) : _BrutMsg(msg)
+Command::Command(std::string msg, std::map<int, User*> Us, int clientSock, std::map<std::string, Channel *> Chann, Server *serv) : _BrutMsg(msg)
 {
 	std::istringstream ss(msg);
 	Users = Us;
 	Chan = Chann;
 	std::string token;
+	_serv = serv;
 
 	while (std::getline(ss, token, ' '))
 	{
