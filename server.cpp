@@ -6,7 +6,7 @@
 /*   By: redarnet <redarnet@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/21 15:54:49 by mettien           #+#    #+#             */
-/*   Updated: 2023/01/09 01:36:48 by redarnet         ###   ########.fr       */
+/*   Updated: 2023/01/10 04:20:44 by redarnet         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,33 @@ Server::Server(std::string input_port, std::string input_passwd)
 	this->_sock = 0; // * utile? *
 }
 
-Server::~Server() {}
+void	Server::destroy()
+{
+	std::map<std::string, Channel *>::iterator it  = Chans.begin();
+	for (; it != Chans.end(); )
+	{
+		delete it->second;
+		std::map<std::string, Channel *>::iterator next = it;
+		++next;
+		Chans.erase(it);
+		it = next;
+	}
+	std::map<int , User *>::iterator itUser  = Users.begin();
+	for (; itUser != Users.end();)
+	{
+		delete itUser->second;
+		std::map<int , User *>::iterator nextuser = itUser;
+		++nextuser;
+		Users.erase(itUser);
+		itUser = nextuser;
+	}
+
+}
+
+Server::~Server()
+{
+	destroy();
+}
 
 void Server::run()
 {
@@ -107,7 +133,6 @@ void Server::add_fd(int sock, int event, int isServer) /* changer le nom par add
 	std::cout << "-----------------" << std::endl;
 	std::vector<pollfd> :: iterator it;
    	for(it = _pfds.begin(); it != _pfds.end(); it++)
-
 	{
 	    // std::cout << "| Fd: " << it->fd << "| Event:  " << it->events << std::endl;
 	}
@@ -129,11 +154,14 @@ int Server::waitConnection()
 	Server::sendPing();
 	nb_event = poll(&_pfds[0], _pfds.size(), 5000);  /* changer le timeout */
 	// std::cout << "Poll result : " << nb_event << std::endl;
-	if (nb_event == -1)
-	{
-		std::cout << "Poll failed " << std::endl;
-		return -1;
-	}
+
+	// leak si quit issi
+	// if (nb_event == -1)
+	// {
+	// 	std::cout << "Poll failed " << std::endl;
+	// 	Server::destroy();
+	// 	return -1;
+	// }
 
 	/////  Boucle d'attente de connexions entrantes ou existantes   ///////
 	int currentSize = _pfds.size();
@@ -183,7 +211,7 @@ void	Server::setUserInfo(std::string buff, int fd)
 	if (itUser != Users.end())
 	{
 		if (itUser->second->cmduser != 1)
-			Command("USER Theo", Users, itUser->first, Chans);
+			Command("USER User", Users, itUser->first, Chans);
 		// recup env ?
 	}
 
@@ -214,20 +242,12 @@ int Server::rcvFromClient(int fd)
 	std::cout << "Received from Client: " << std::string(buf, 0, byteRcv) << std::endl;
 	std::string str = buf;
 	size_t po = str.find("\r");
-        while (po != std::string::npos) {
-            str.erase(po, 1);
-            po = str.find("\r");
-        }
-	// std::map<int, User *>::iterator it = Users.find(fd);
-	// if (it->second->getUserNick() == "")
-		setUserInfo(str, fd);
-	// else
-	// {
-	// 	Command cmd(str, Users, fd, Chan);
-	// 	Users =  cmd.set_Users();
-	// 	Chan =  cmd.set_Chan();
-	// }
-	// Users[pos]->setCmd(std::string(buf, 0, byteRcv));
+	while (po != std::string::npos)
+	{
+		str.erase(po, 1);
+		po = str.find("\r");
+	}
+	setUserInfo(str, fd);
 	return 0;
 }
 
@@ -266,23 +286,42 @@ void	Server::sendPing()
 	}
 }
 
+void	Server::suppr_user_channel(User *U)
+{
+	std::map<std::string, Channel *>::iterator it = Chans.begin();
+	for (; it != Chans.end(); it++)
+	{
+		it->second->suppr_user(U);
+	}
+}
+
 void	Server::deconnectUsers()
 {
 	for (std::map<int, User*>::iterator it = Users.begin(); it != Users.end();)
 	{
 		if (it->second->getConnected() == false || it->second->getLastPing() >= (60 + 5))
 		{
-			std::cout << "Client at socket " << it->first << " disconnected." << std::endl;
+			std::cout << "pClient at socket " << it->first << " disconnected." << std::endl;
+			//cherche le user dans le channel et le supprimer
+			suppr_user_channel(it->second);
+
 			for (size_t i = 0; i < _pfds.size(); i++)
 			{
 				if (_pfds[i].fd == it->second->getUserSocket())
+				{
 					_pfds.erase(_pfds.begin() + i);
+				}
 			}
 			// quit(it->second, "QUIT :Client disconnected.");
-			Users.erase(it++);
+			delete it->second;
+			std::map<int , User *>::iterator next = it;
+			++next;
+			Users.erase(it);
+			it = next;
+			removeEmptyChannel();
 		}
 		else
-			++it;
+			it++;
 	}
 }
 

@@ -120,3 +120,6 @@ int	Command::kick(User *U)
 	U->reply(401, arguments[1]);
 	return -1;
 }
+
+
+

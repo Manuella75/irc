@@ -14,6 +14,9 @@
 #include <map>
 #include <regex.h>
 #include <time.h>
+#include <csignal>
+
+int	socketDescriptor = 0;
 
 std::string		parse(std::string contenu)
 {
@@ -124,13 +127,21 @@ void	send_question(std::map<std::string, std::string> question, int socketDescri
 	}
 }
 
-int main(int argc, char **argv)
-{
 	std::map<std::string, std::string> question;
 	std::string contenu;
+void signal_handler(int signal)
+{
+	(void)signal;
+	std::cout << " quit sockt" << socketDescriptor << std::endl;
+	send_msg("QUIT :Lost terminal\n", socketDescriptor);
+	exit(0);
+}
+
+int main(int argc, char **argv)
+{
+	std::signal(SIGINT, signal_handler);
 	std::string message;
 	char msg[4096];
-	int	socketDescriptor = 0;
 	int port = atoi(argv[1]);
 	struct sockaddr_in serverAddress;
 	struct hostent *hostInfo;
@@ -171,7 +182,11 @@ int main(int argc, char **argv)
 		if (send_msg("PONG \n", socketDescriptor) < 0)
 			return 0;
 		if(recv(socketDescriptor, msg, 4096, 0) == 0)
+		{
+			if (send_msg("QUIT :Lost terminal\n", socketDescriptor) < 0)
+				return 0;
 			return (std::cout << "** Le serveur n'a répondu dans la seconde.\n", 0);
+		}
 		std::cout << "msg = " << msg << std::endl;
 		message = pars_msg(msg);
 		std::cout << "message = " << message << std::endl;
@@ -180,5 +195,7 @@ int main(int argc, char **argv)
 		memset(msg, 0 , 4096);
 		usleep(1000000);
 	}
+	if (send_msg("QUIT :Lost terminal\n", socketDescriptor) < 0)
+		return 0;
 	return 0;
 }

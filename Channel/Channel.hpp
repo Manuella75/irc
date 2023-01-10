@@ -40,6 +40,7 @@ class Channel
 		void								kickMember(User *member);
 		void								addMember(User *member);
 		int									verif_user(int socket);
+		void								suppr_user(User *U);
 
 };
 #endif

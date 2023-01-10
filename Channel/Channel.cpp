@@ -111,3 +111,12 @@ int		Channel::verif_user(int socket)
 	}
 	return 0;
 }
+
+void	Channel::suppr_user(User *U)
+{
+	std::map<int, User *>::const_iterator itUser;
+		itUser = this->getUsers().find(U->getUserSocket());
+	if (itUser != _Users.end())
+		this->getUsers().erase(U->getUserSocket());
+}
+

@@ -45,6 +45,7 @@ class	Command
 		int privmsg(User *U);
 		int notice(User *U);
 		int	oper(User *U);
+		int	quit(User *U);
 		int privmsg_user(User *U, std::string msg);
 		int notice_user(User *U, std::string msg);
 		int	kick(User *U);

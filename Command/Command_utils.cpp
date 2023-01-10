@@ -19,10 +19,8 @@ void	Command::send_message_chan(User *U, std::string message,std::string arg, Ch
 void	Command::send_message_all(User *U, std::string message, std::string arg)
 {
 	std::string msg;
-
-
-
 	std::map<int, User *>::const_iterator itUser;
+
 	itUser = Users.begin();
 	for (; itUser != Users.end(); itUser++)
 	{
